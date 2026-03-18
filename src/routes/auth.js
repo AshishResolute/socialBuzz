@@ -3,6 +3,7 @@ import joi from "joi";
 import db from "../../database/connection.js";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
+import { AppError } from "../../ErrorHandler/ErrorClass.js";
 const router = express.Router();
 
 // for signUp i need email,password,confirmPassword,userName => validate every inputs and store hashed Passwords
@@ -37,7 +38,7 @@ router.post("/signup", async (req, res) => {
     let { error, value } = signUpSchema.validate(req.body);
     if (error) {
       error.details.map((err) => console.log(err.message));
-      return res.status(400).json({ message: `Input Validation Failed` });
+      return next(new AppError(`Input Validation Failed!,check entered details`,400))
     }
     let { email, password, userName } = value;
     let hashedPassword = await bcrypt.hash(password, 10);
@@ -46,11 +47,11 @@ router.post("/signup", async (req, res) => {
       [email, hashedPassword, userName],
     );
     if (result.rowCount === 0)
-      return res.status(400).json({ message: `SignUp Failed!` });
+      return next(new AppError(`Signup Failed!,Try Again Later`,500))
     res.status(200).json({ message: `SignUp Successfull!` });
   } catch (err) {
     console.log(`Error:${err.messsage}`);
-    res.status(500).json({ messageL: `Internal Server error` });
+    res.status(500).json({ message: `Internal Server error` });
   }
 });
 
@@ -68,25 +69,25 @@ let loginSchema = joi.object({
       'string.pattern.base': 'Password must contain at least one uppercase, one lowercase, and one special character'
     })
 });
-router.post('/login',async(req,res)=>{
+router.post('/login',async(req,res,next)=>{
   try{
         let {error,value} = loginSchema.validate(req.body);
         if(error)
         {
           error.details.map(err=>console.log(err.message));
-          return res.status(400).json({message:`Input Validation failed,check the Input Details`})
+          return next(new AppError(`Input Validation Failed,Check entered Details`,400))
         }
         let {email,password} = value;
         let findUser = await db.query(`select * from users where email=$1`,[email]);
-        if(findUser.rowCount===0) return res.status(404).json({message:`User not Found!`});
+        if(findUser.rowCount===0) return next(new AppError(`User not Found!`,404))
         let verifyPassword = await bcrypt.compare(password,findUser.rows[0].password);
-        if(!verifyPassword) return res.status(400).json({message:`Passwords Don't match,Login Failed!`});
+        if(!verifyPassword) return next(new AppError(`Passwords Don't match,Try Again Login Failed!`,400));
         let token = await jwt.sign({id:findUser.rows[0].id,userName:findUser.rows[0].username},process.env.JWT_KEY,{expiresIn:'15m'});
         res.status(200).json({message:`Login Success!`,Details:`Welcome Back! ${findUser.rows[0].username}`,token})
   }
   catch(err) {
     console.log(`Error:${err.messsage}`);
-    res.status(500).json({ messageL: `Internal Server error` });
+    next(err)
   }
 })
 export default router;

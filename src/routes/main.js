@@ -10,4 +10,14 @@ app.get('/health',(req,res)=>{
 })
 
 app.use('/auth',auth)
+
+
+app.use((err,req,res,next)=>{
+    const status = err.statusCode||500
+    const ErrorDetails={
+        message:err.message||`Internal Server Error`,
+        TimeStamp:new Date().toISOString()
+    }
+    res.status(status).json(ErrorDetails)
+})
 export default app
