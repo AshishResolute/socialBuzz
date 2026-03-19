@@ -1,23 +1,26 @@
-import express from 'express';
-import morgan from 'morgan';
-import auth from './auth.js';
+import express from "express";
+import morgan from "morgan";
+import auth from "./auth.js";
+import posts from "./posts.js";
+
+
 const app = express();
 
 app.use(express.json());
-app.use(morgan('dev'))
-app.get('/health',(req,res)=>{
-    res.status(200).json({message:`Services Running Well,All Good!`});
-})
+app.use(morgan("dev"));
+app.get("/health", (req, res) => {
+  res.status(200).json({ message: `Services Running Well,All Good!` });
+});
 
-app.use('/auth',auth)
+app.use("/auth", auth);
+app.use("/post", posts);
 
-
-app.use((err,req,res,next)=>{
-    const status = err.statusCode||500
-    const ErrorDetails={
-        message:err.message||`Internal Server Error`,
-        TimeStamp:new Date().toISOString()
-    }
-    res.status(status).json(ErrorDetails)
-})
-export default app
+app.use((err, req, res, next) => {
+  const status = err.statusCode || 500;
+  const ErrorDetails = {
+    message: err.message || `Internal Server Error`,
+    TimeStamp: new Date().toISOString(),
+  };
+  res.status(status).json(ErrorDetails);
+});
+export default app;
