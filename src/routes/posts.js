@@ -44,4 +44,31 @@ router.post("/content", verifyToken, async (req, res, next) => {
   }
 });
 
+
+const updatedPostContent = joi.object({
+  content:joi.string().required()
+})
+
+
+router.put('/editPost',verifyToken,async(req,res,next)=>{
+  try{
+    let user_id = req.user.id;
+    let {error,value} = updatedPostContent.validate(req.body);
+    if(error)  {
+      error.details.map(err=>console.log(err.message));
+      return next(new AppError(`Enter valid text content`,400))
+    }
+    let findUser = await db.query(`select username from users where id=$1`,[user_id]);
+    if(findUser.rowCount===0) return next(new AppError(`User not Found!`,404));
+    let {content} = value
+    let updatePostContent = await db.query(`update posts set content=$1,updated_at=$2 where user_id=$3 returning updated_at`,[content,new Date().toISOString(),user_id]);
+    if(updatePostContent.rowCount===0) return next(new AppError(`Post not Updated,Try Again!`,500));
+    res.status(200).json({message:`post updated successfuly for ${findUser.rows[0].username}`,updated_at:updatePostContent.rows[0].updated_at})
+  }
+  catch(error)
+  {
+    console.log(error.message);
+    next(error)
+  }
+})
 export default router;
