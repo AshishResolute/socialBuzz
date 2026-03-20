@@ -44,24 +44,26 @@ const updatedPostContent = joi.object({
   content: joi.string().required(),
 });
 
-router.put("/editPost", verifyToken, async (req, res, next) => {
+router.put("/editPost/:postId", verifyToken, async (req, res, next) => {
   try {
     let user_id = req.user.id;
+    let post_id = req.params.postId
+    console.log(post_id)
     let { error, value } = updatedPostContent.validate(req.body);
     if (error) {
       error.details.map((err) => console.log(err.message));
       return next(new AppError(`Enter valid text content`, 400));
     }
     let findUser = await db.query(
-      `select u.username as username,p.id as post_id from users as u join posts as p on u.id = p.user_id where p.user_id=$1`,
-      [user_id],
+      `select u.username as username,p.id as post_id from users as u join posts as p on u.id = p.user_id where p.user_id=$1 and p.id=$2`,
+      [user_id,post_id],
     );
     if (findUser.rowCount === 0)
       return next(new AppError(`User not Found!`, 404));
     let { content } = value;
     let updatePostContent = await db.query(
-      `update posts set content=$1,updated_at=$2 where id=$3 returning updated_at`,
-      [content, new Date().toISOString(), findUser.rows[0].post_id],
+      `update posts set content=$1,updated_at=$2 where id=$3 and user_id=$4 returning updated_at`,
+      [content, new Date().toISOString(),post_id,user_id]
     );
     if (updatePostContent.rowCount === 0)
       return next(new AppError(`Post not Updated,Try Again!`, 500));
