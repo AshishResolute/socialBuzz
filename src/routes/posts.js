@@ -7,9 +7,7 @@ import { AppError } from "../../ErrorHandler/ErrorClass.js";
 const router = express.Router();
 
 let checkUserContent = joi.object({
-  content: joi
-    .string()
-    .required()
+  content: joi.string().required(),
 });
 
 router.post("/content", verifyToken, async (req, res, next) => {
@@ -32,43 +30,50 @@ router.post("/content", verifyToken, async (req, res, next) => {
     );
     if (postAContent.rowCount === 0)
       return next(new AppError(`Failed To make a Post`, 500));
-    res
-      .status(200)
-      .json({
-        message: `post made by ${findUser.rows[0].username}`,
-        postedAt:postAContent.rows[0].created_at,
-      });
+    res.status(200).json({
+      message: `post made by ${findUser.rows[0].username}`,
+      postedAt: postAContent.rows[0].created_at,
+    });
   } catch (error) {
     console.log(error.message);
     next(error);
   }
 });
 
-
 const updatedPostContent = joi.object({
-  content:joi.string().required()
-})
+  content: joi.string().required(),
+});
 
-
-router.put('/editPost',verifyToken,async(req,res,next)=>{
-  try{
+router.put("/editPost", verifyToken, async (req, res, next) => {
+  try {
     let user_id = req.user.id;
-    let {error,value} = updatedPostContent.validate(req.body);
-    if(error)  {
-      error.details.map(err=>console.log(err.message));
-      return next(new AppError(`Enter valid text content`,400))
+    let { error, value } = updatedPostContent.validate(req.body);
+    if (error) {
+      error.details.map((err) => console.log(err.message));
+      return next(new AppError(`Enter valid text content`, 400));
     }
-    let findUser = await db.query(`select username from users where id=$1`,[user_id]);
-    if(findUser.rowCount===0) return next(new AppError(`User not Found!`,404));
-    let {content} = value
-    let updatePostContent = await db.query(`update posts set content=$1,updated_at=$2 where user_id=$3 returning updated_at`,[content,new Date().toISOString(),user_id]);
-    if(updatePostContent.rowCount===0) return next(new AppError(`Post not Updated,Try Again!`,500));
-    res.status(200).json({message:`post updated successfuly for ${findUser.rows[0].username}`,updated_at:updatePostContent.rows[0].updated_at})
-  }
-  catch(error)
-  {
+    let findUser = await db.query(
+      `select u.username as username,p.id as post_id from users as u join posts as p on u.id = p.user_id where p.user_id=$1`,
+      [user_id],
+    );
+    if (findUser.rowCount === 0)
+      return next(new AppError(`User not Found!`, 404));
+    let { content } = value;
+    let updatePostContent = await db.query(
+      `update posts set content=$1,updated_at=$2 where id=$3 returning updated_at`,
+      [content, new Date().toISOString(), findUser.rows[0].post_id],
+    );
+    if (updatePostContent.rowCount === 0)
+      return next(new AppError(`Post not Updated,Try Again!`, 500));
+    res
+      .status(200)
+      .json({
+        message: `post updated successfuly for ${findUser.rows[0].username}`,
+        updated_at: updatePostContent.rows[0].updated_at,
+      });
+  } catch (error) {
     console.log(error.message);
-    next(error)
+    next(error);
   }
-})
+});
 export default router;
