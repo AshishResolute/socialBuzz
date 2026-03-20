@@ -2,7 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import auth from "./auth.js";
 import posts from "./posts.js";
-
+import likes from './likes.js';
 
 const app = express();
 
@@ -14,6 +14,7 @@ app.get("/health", (req, res) => {
 
 app.use("/auth", auth);
 app.use("/post", posts);
+app.use("/like",likes);
 
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;

@@ -13,3 +13,11 @@ create table if not exists posts(
     created_at timestamp default now(),
     updated_at timestamp default now()
 );
+
+create table if not exists likes(
+    id serial primary key,
+    post_id int references posts(id),
+    user_id int references users(id) on delete cascade,
+    liked_at timestamp default now(),
+    unique(post_id,user_id)
+)
