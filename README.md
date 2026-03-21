@@ -69,8 +69,10 @@ Create a `.env` file in the root directory:
 ```env
 PORT=3000
 DB_HOST=HOST_NAME
-DB_PORT
+DB_PORT=5432(Currently localhost later render external database)
 DB_NAME
+DB_PASSWORD
+DB_USER
 JWT_ACCESS_SECRET=your_access_secret
 ```
 
