@@ -48,12 +48,32 @@ router.delete("/unlikePost/:PostId", verifyToken, async (req, res, next) => {
     ]);
     if (deletePost.rowCount === 0)
       return next(new AppError(`Post is still Liked,unlike Failed!`, 500));
-    res
-      .status(200)
-      .json({
-        message: `Post unliked successfully!`,
-        TimeStamp: `Unliked Post at ${new Date().toISOString()}`,
-      });
+    res.status(200).json({
+      message: `Post unliked successfully!`,
+      TimeStamp: `Unliked Post at ${new Date().toISOString()}`,
+    });
+  } catch (err) {
+    console.log(err.message);
+    next(err);
+  }
+});
+
+router.get("/totalLikes/:postId", verifyToken, async (req, res, next) => {
+  try {
+    let user_id = req.user.id;
+    let post_id = parseInt(req.params.postId);
+    if (isNaN(post_id))
+      return next(new AppError(`Invalid post_id recieved`, 400));
+    let findPost = await db.query(
+      `select count(user_id) as likes_count from likes where post_id=$1  group by post_id=$2`,
+      [post_id,post_id],
+    );
+    if (findPost.rowCount === 0)
+      return next(new AppError(`Post not yet liked!`, 400));
+    res.status(200).json({
+      message: `Your Post has ${findPost.rows[0].likes_count} Likes`,
+      TimeStamp: new Date().toISOString(),
+    });
   } catch (err) {
     console.log(err.message);
     next(err);
