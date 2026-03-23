@@ -20,4 +20,13 @@ create table if not exists likes(
     user_id int references users(id) on delete cascade,
     liked_at timestamp default now(),
     unique(post_id,user_id)
-)
+);
+
+create table if not exists comments(
+    id serial primary key,
+    post_id int references posts(id) on delete cascade,
+    user_id int references users(id) on delete cascade,
+    content text not null,
+    commented_on timestamp default now(),
+    updated_at timestamp default now()
+);
