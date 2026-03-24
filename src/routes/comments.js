@@ -30,7 +30,7 @@ router.post("/postComment/:postId", verifyToken, async (req, res, next) => {
       return next(new AppError(`Post not Found!`, 404));
     let comment = await db.query(
       `insert into comments(post_id,user_id,content) values($1,$2,$3) returning id,commented_on`,
-      [post_id, user_id,userComment],
+      [post_id, user_id, userComment],
     );
     if (comment.rowCount === 0)
       return next(new AppError(`Comment not posted,Try Again Later!`, 500));
@@ -44,5 +44,38 @@ router.post("/postComment/:postId", verifyToken, async (req, res, next) => {
     next(err);
   }
 });
+
+router.delete(
+  "/deleteComment/:postId/:commentId",
+  verifyToken,
+  async (req, res, next) => {
+    try {
+      let user_id = req.user.id
+      let post_id = parseInt(req.params.postId);
+      let comment_id = parseInt(req.params.commentId);
+      if (isNaN(post_id) || isNaN(comment_id))
+        return next(
+          new AppError(`Invalid post_id or comment_id recieved`, 400),
+        );
+      let findCommentOnPost = await db.query(
+        `select id from comments where post_id=$1 and id=$2 and user_id=$3`,
+        [post_id, comment_id,user_id],
+      );
+      if (findCommentOnPost.rowCount === 0)
+        return next(new AppError(`Comment not Found or Post deleted!`, 404));
+      let deleteComment = await db.query(`delete from comments where id=$1`, [
+        comment_id,
+      ]);
+      if (deleteComment.rowCount === 0)
+        return next(new AppError(`Comment not deleted,Try Again`, 500));
+      res.status(200).json({
+        message: `success,comment deleted`,
+      });
+    } catch (err) {
+      console.log(err.message);
+      next(err);
+    }
+  },
+);
 
 export default router;
