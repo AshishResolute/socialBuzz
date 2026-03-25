@@ -45,6 +45,12 @@ A backend REST API for a social media platform built with Node.js, Express, and 
 | POST | `likes/likePost/:PostId` | Like a post |
 | DELETE | `likes/unlikePost/:PostId` | Unlike a post |
 
+### Comments
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `comment/postComment/:postId` | Comment in a post |
+| DELETE | `comment/deleteComment/:postId/:commentId` | Users can delete their comment in a post |
+| PATCH | `comment/updateComment/:postId/:commentId` | Users can edit their comment in a post |
 ---
 
 ## Getting Started
@@ -93,7 +99,7 @@ npm start
 - [x] User authentication (signup/login)
 - [x] Create and edit posts
 - [x] Like/unlike posts
-- [ ] Comments
+- [x] Comments
 - [ ] Follow/unfollow users
 - [ ] Notifications (BullMQ + Redis)
 - [ ] Real email delivery (Nodemailer)
