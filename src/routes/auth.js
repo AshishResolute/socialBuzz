@@ -4,6 +4,7 @@ import db from "../../database/connection.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { AppError } from "../../ErrorHandler/ErrorClass.js";
+import { authLimitter } from "../rateLimitter/rate-limitter.js";
 const router = express.Router();
 
 // for signUp i need email,password,confirmPassword,userName => validate every inputs and store hashed Passwords
@@ -33,7 +34,7 @@ const signUpSchema = joi.object({
     .required(),
 });
 
-router.post("/signup", async (req, res) => {
+router.post("/signup",authLimitter, async (req, res) => {
   try {
     let { error, value } = signUpSchema.validate(req.body);
     if (error) {
@@ -72,7 +73,7 @@ let loginSchema = joi.object({
         "Password must contain at least one uppercase, one lowercase, and one special character",
     }),
 });
-router.post("/login", async (req, res, next) => {
+router.post("/login",authLimitter, async (req, res, next) => {
   try {
     let { error, value } = loginSchema.validate(req.body);
     if (error) {
