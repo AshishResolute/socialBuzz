@@ -3,6 +3,7 @@ import { AppError } from "../../ErrorHandler/ErrorClass.js";
 import db from "../../database/connection.js";
 import verifyToken from "../middlewears/verifyToken.js";
 import resend from "../util/resend.js";
+import emailQueue from "../queues/emailQueue.js";
 
 const router = express.Router();
 
@@ -20,18 +21,9 @@ router.post("/likePost/:PostId", verifyToken, async (req, res, next) => {
       `insert into likes(post_id,user_id) values($1,$2) returning id,liked_at`,
       [post_id, user_id],
     );
-    const {data,error} = await resend.emails.send({
-      from:`socialBuzz <onboarding@resend.dev>`,
-      to:`ashishgourh08@gmail.com`,
-      subject:`Learning to use resend instead of nodemailer this time`,
-      html:`<strong>Your Post was Liked!</strong>`      
-    })
-
-    if(error) {
-      console.error(`Error:${error.message}`)
-      return next(new AppError(`Mail not sent!`,500))
-    }
     
+      await emailQueue.add("emailQueue",{to:`${process.env.RESEND_USER_ACCOUNT_NAME}`})
+
     res.status(200).json({
       message: `You successfully liked the post with Id${post_id}`,
       likeId: likeAPost.rows[0].id,
