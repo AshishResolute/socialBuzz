@@ -101,8 +101,8 @@ npm start
 - [x] Like/unlike posts
 - [x] Comments
 - [ ] Follow/unfollow users
-- [ ] Notifications (BullMQ + Redis)
-- [ ] Real email delivery (Nodemailer)
+- [x] Notifications (BullMQ + Redis)
+- [x] Real email delivery (resend)
 - [ ] File uploads (Multer + Cloudinary)
 - [ ] API documentation (Swagger)
 - [ ] Test suite (Jest + Supertest)
