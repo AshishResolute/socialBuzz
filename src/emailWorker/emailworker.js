@@ -34,7 +34,7 @@ let postWorker = new Worker(
       from: `socialBuzz <onboarding@resend.dev>`,
       to: job.data.to,
       subject: `Notification regarding new Post!`,
-      html: `<strong>New post successfully created!<strong/>`,
+      html: `<strong>${job.data.message}<strong/>`,
     });
     if (error)
       return console.error(`Mail not sent,Error Details:${error.mesage}`);

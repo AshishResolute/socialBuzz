@@ -12,7 +12,6 @@ const currentFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(currentFile);
 dotenv.config({path:path.join(__dirname,'../../dev.env')})
 
-
 const router = express.Router();
 
 let checkUserContent = joi.object({
@@ -46,7 +45,7 @@ router.post(
       );
       if (postAContent.rowCount === 0)
         return next(new AppError(`Failed To make a Post`, 500));
-      await postQueue.add("postQueue",{to:process.env.RESEND_USER_ACCOUNT_NAME})
+      await postQueue.add("postQueue",{to:process.env.RESEND_USER_ACCOUNT_NAME,message:`New post successfully created!`})
       res.status(200).json({
         message: `post made by ${findUser.rows[0].username}`,
         postedAt: postAContent.rows[0].created_at,
@@ -89,6 +88,7 @@ router.put(
       );
       if (updatePostContent.rowCount === 0)
         return next(new AppError(`Post not Updated,Try Again!`, 500));
+      await postQueue.add("postQueue",{to:process.env.RESEND_USER_ACCOUNT_NAME,message:`Post successfully updated!`})
       res.status(200).json({
         message: `post updated successfuly for ${findUser.rows[0].username}`,
         updated_at: updatePostContent.rows[0].updated_at,

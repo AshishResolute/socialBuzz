@@ -17,7 +17,7 @@ const pool = new Pool({
 })
 
 pool.query('select now()',(err,res)=>{
-    if(err) console.log(`Database Connection Failed,${err.stack}`)
+    if(err) return  console.log(`Database Connection Failed,${err.stack}`)
         console.log(`Database Connected at ${res.rows[0].now}`)
 })
 
