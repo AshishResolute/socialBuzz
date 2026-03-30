@@ -4,6 +4,14 @@ import joi from "joi";
 import db from "../../database/connection.js";
 import { AppError } from "../../ErrorHandler/ErrorClass.js";
 import { userPostLimitter } from "../rateLimitter/rate-limitter.js";
+import { postQueue } from "../queues/emailQueue.js";
+import {fileURLToPath} from 'url';
+import path from 'path';
+import dotenv from 'dotenv';
+const currentFile = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(currentFile);
+dotenv.config({path:path.join(__dirname,'../../dev.env')})
+
 
 const router = express.Router();
 
@@ -38,6 +46,7 @@ router.post(
       );
       if (postAContent.rowCount === 0)
         return next(new AppError(`Failed To make a Post`, 500));
+      await postQueue.add("postQueue",{to:process.env.RESEND_USER_ACCOUNT_NAME})
       res.status(200).json({
         message: `post made by ${findUser.rows[0].username}`,
         postedAt: postAContent.rows[0].created_at,

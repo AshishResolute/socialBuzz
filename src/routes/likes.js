@@ -3,7 +3,7 @@ import { AppError } from "../../ErrorHandler/ErrorClass.js";
 import db from "../../database/connection.js";
 import verifyToken from "../middlewears/verifyToken.js";
 import resend from "../util/resend.js";
-import emailQueue from "../queues/emailQueue.js";
+import {emailQueue} from "../queues/emailQueue.js";
 
 const router = express.Router();
 
