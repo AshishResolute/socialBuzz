@@ -34,7 +34,7 @@ const signUpSchema = joi.object({
     .required(),
 });
 
-router.post("/signup",authLimitter, async (req, res) => {
+router.post("/signup",authLimitter, async (req, res,next) => {
   try {
     let { error, value } = signUpSchema.validate(req.body);
     if (error) {
@@ -53,7 +53,7 @@ router.post("/signup",authLimitter, async (req, res) => {
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
     res.status(200).json({ message: `SignUp Successfull!` });
   } catch (err) {
-    console.log(`Error:${err.messsage}`);
+    console.log(`Error:${err}`);
     res.status(500).json({ message: `Internal Server error` });
   }
 });
@@ -114,3 +114,52 @@ router.post("/login",authLimitter, async (req, res, next) => {
   }
 });
 export default router;
+
+/**
+ * @openapi
+ * /auth/signup:
+ *   post:
+ *     description: Here users can create their social accounts
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - confirmPassword
+ *               - userName
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: abc@example.com
+ *                 description: Users email address must be an valid email address
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *                 maxLength: 28
+ *                 description: must have one uppercase,lowercase and a special character with min length of 8
+ *                 example: Dummypassword!
+ *               confirmPassword:
+ *                 type: string
+ *                 minLength: 8
+ *                 maxLength: 28
+ *                 example: Dummypassword!
+ *                 description: must have one uppercase,lowercase and a special character with min length of 8
+ *               userName:
+ *                 type: string
+ *                 description: Must be the name for your account that will be visible to others
+ *                 example: Ash Ketchum
+ *     responses:
+ *      '200':
+ *         description: User account created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: string
+ *               properties:
+ *                 message: SignUp Successfull!
+ */
