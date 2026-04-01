@@ -5,12 +5,12 @@ import db from "../../database/connection.js";
 import { AppError } from "../../ErrorHandler/ErrorClass.js";
 import { userPostLimitter } from "../rateLimitter/rate-limitter.js";
 import { postQueue } from "../queues/emailQueue.js";
-import {fileURLToPath} from 'url';
-import path from 'path';
-import dotenv from 'dotenv';
+import { fileURLToPath } from "url";
+import path from "path";
+import dotenv from "dotenv";
 const currentFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(currentFile);
-dotenv.config({path:path.join(__dirname,'../../dev.env')})
+dotenv.config({ path: path.join(__dirname, "../../dev.env") });
 
 const router = express.Router();
 
@@ -45,7 +45,10 @@ router.post(
       );
       if (postAContent.rowCount === 0)
         return next(new AppError(`Failed To make a Post`, 500));
-      await postQueue.add("postQueue",{to:process.env.RESEND_USER_ACCOUNT_NAME,message:`New post successfully created!`})
+      await postQueue.add("postQueue", {
+        to: process.env.RESEND_USER_ACCOUNT_NAME,
+        message: `New post successfully created!`,
+      });
       res.status(200).json({
         message: `post made by ${findUser.rows[0].username}`,
         postedAt: postAContent.rows[0].created_at,
@@ -88,7 +91,10 @@ router.put(
       );
       if (updatePostContent.rowCount === 0)
         return next(new AppError(`Post not Updated,Try Again!`, 500));
-      await postQueue.add("postQueue",{to:process.env.RESEND_USER_ACCOUNT_NAME,message:`Post successfully updated!`})
+      await postQueue.add("postQueue", {
+        to: process.env.RESEND_USER_ACCOUNT_NAME,
+        message: `Post successfully updated!`,
+      });
       res.status(200).json({
         message: `post updated successfuly for ${findUser.rows[0].username}`,
         updated_at: updatePostContent.rows[0].updated_at,
@@ -99,4 +105,51 @@ router.put(
     }
   },
 );
+
+router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
+  try {
+    let user_id = req.user.id;
+    let post_id = parseInt(req.params.postId);
+    console.log(`post_id:${post_id}`)
+    if (isNaN(post_id))
+      return next(new AppError(`Invalid postId recieved`), 400);
+    let findPost = await db.query(`select id from posts where id=$1`, [
+      post_id,
+    ]);
+    if (findPost.rowCount===0) return next(new AppError(`Post not found`, 404));
+    let deletePost = await db.query(
+      `delete from posts where id=$1 and user_id=$2`,
+      [post_id, user_id],
+    );
+    if (deletePost.rowCount === 0)
+      return next(new AppError(`Post not deleted,try again later`, 500));
+    res.status(200).json({
+      message: `post deleted successfully!`,
+      timeStamp: new Date().toLocaleString(),
+    });
+  } catch (err) {
+    console.log(`Error Details:${err.message}`);
+    next(err);
+  }
+});
+
+// /**
+//  * @openapi
+//  * /post/delete/:postId
+//  *   delete:
+//  *     description: Users can delete their Post
+//  *     
+//  */
+
+
+
+
+
+
+
+
+
+
+
+
 export default router;

@@ -163,3 +163,53 @@ export default router;
  *               properties:
  *                 message: SignUp Successfull!
  */
+
+/**
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     description: Users can login to their account returns an JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: true
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: abc@example.com
+ *                 description: user email to login
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *                 maxLength: 28
+ *                 example: DummyPassword!
+ *                 description: password must contain atleast one uppercase,lowercase and a special character
+ *     responses:
+ *       200:
+ *         description: successfull login will display a username and return a token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Login success!
+ *                 Details:
+ *                   type: string
+ *                   description: Welcome Back! userName
+ *                 token:
+ *                   type: string
+ *                   description: contains the jwt token
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlck5hbWUiOiJTZXJlbmEiLCJpYXQiOjE3NzUwMDE5MDksImV4cCI6MTc3NTAwMjgwOX0.DityXvZeZ4k85qCUHsS7sAbRRpWPK4hWhe-rX08DqUo
+ *           
+ * 
+ * 
+ *   
+ */

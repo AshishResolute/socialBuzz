@@ -30,7 +30,6 @@ app.use("/auth", auth);
 app.use("/post", posts);
 app.use("/like", likes);
 app.use("/comment", comments);
-console.log(JSON.stringify(specs, null, 2));
 app.use("/api-docs",swaggerUi.serve,swaggerUi.setup(specs))
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
