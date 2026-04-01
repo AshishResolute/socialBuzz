@@ -35,4 +35,4 @@ create table if not exists follow(
     follower_id int references users(id),
     following_id int references users(id),
     unique(follower_id,following_id)
-)
+);
