@@ -34,7 +34,7 @@ const signUpSchema = joi.object({
     .required(),
 });
 
-router.post("/signup",authLimitter, async (req, res,next) => {
+router.post("/signup", authLimitter, async (req, res, next) => {
   try {
     let { error, value } = signUpSchema.validate(req.body);
     if (error) {
@@ -73,7 +73,7 @@ let loginSchema = joi.object({
         "Password must contain at least one uppercase, one lowercase, and one special character",
     }),
 });
-router.post("/login",authLimitter, async (req, res, next) => {
+router.post("/login", authLimitter, async (req, res, next) => {
   try {
     let { error, value } = loginSchema.validate(req.body);
     if (error) {
@@ -101,18 +101,42 @@ router.post("/login",authLimitter, async (req, res, next) => {
       process.env.JWT_KEY,
       { expiresIn: "15m" },
     );
-    res
-      .status(200)
-      .json({
-        message: `Login Success!`,
-        Details: `Welcome Back! ${findUser.rows[0].username}`,
-        token,
-      });
+    let refreshToken = await jwt.sign(
+      { id: findUser.rows[0].id },
+      process.env.JWT_REFRESH_KEY,
+      { expiresIn: "7d" },
+    );
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 86400000,
+      sameSite: "strict",
+    });
+    res.status(200).json({
+      message: `Login Success!`,
+      Details: `Welcome Back! ${findUser.rows[0].username}`,
+      token,
+    });
   } catch (err) {
     console.log(`Error:${err.messsage}`);
     next(err);
   }
 });
+
+router.post("/refreshToken", async (req, res, next) => {
+  try {
+    let refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) return next(new AppError(`No token recieved`, 401));
+    let decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN);
+    let newAccessToken = jwt.sign({ id: decoded.id }, process.env.JWT_KEY, {
+      expiresIn: "15m",
+    });
+    res.json({ newAccessToken });
+  } catch (err) {
+    console.log(`Error Details: ${err.message}`);
+    next(err);
+  }
+});
+
 export default router;
 
 /**
@@ -208,8 +232,8 @@ export default router;
  *                   type: string
  *                   description: contains the jwt token
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlck5hbWUiOiJTZXJlbmEiLCJpYXQiOjE3NzUwMDE5MDksImV4cCI6MTc3NTAwMjgwOX0.DityXvZeZ4k85qCUHsS7sAbRRpWPK4hWhe-rX08DqUo
- *           
- * 
- * 
- *   
+ *
+ *
+ *
+ *
  */
