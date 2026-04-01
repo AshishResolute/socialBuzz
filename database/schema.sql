@@ -30,3 +30,9 @@ create table if not exists comments(
     commented_on timestamp default now(),
     updated_at timestamp default now()
 );
+
+create table if not exists follow(
+    follower_id int references users(id),
+    following_id int references users(id),
+    unique(follower_id,following_id)
+)
