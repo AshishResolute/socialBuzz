@@ -10,7 +10,9 @@ const __dirname = path.dirname(fileName);
 dotenv.config({ path: path.join(__dirname, "../../dev.env") });
 
 let verifyToken = (req, res, next) => {
-  let auth = req.get("Authorization");
+  // console.log("All Headers:", req.headers);
+// console.log("Auth Header:", req.headers.authorization);
+  let auth = req.get("authorization");
   if (!auth) return next(new AppError(`Token not Recieved`, 404));
   let token = auth.split(" ")[1];
   jwt.verify(token, process.env.JWT_KEY, (err, decode) => {

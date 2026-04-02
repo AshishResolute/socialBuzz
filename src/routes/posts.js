@@ -133,13 +133,42 @@ router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
   }
 });
 
-// /**
-//  * @openapi
-//  * /post/delete/:postId
-//  *   delete:
-//  *     description: Users can delete their Post
-//  *     
-//  */
+/**
+ * @openapi
+ * /post/content:
+ *   post:
+ *     description: Here users can make posts just text for now and get a mail on their mail account
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: users post must be in text
+ *                 example: This is my first post!
+ *     responses:
+ *       200:
+ *         description: successfully makes the post and will be visible to users who follow you!
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: post made by username
+ *                 postedAt:
+ *                   type: string
+ *                   example: 2026-04-02T10:55:00.000Z
+ *           
+ */
 
 
 
