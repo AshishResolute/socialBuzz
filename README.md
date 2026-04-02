@@ -100,11 +100,11 @@ npm start
 - [x] Create and edit posts
 - [x] Like/unlike posts
 - [x] Comments
-- [ ] Follow/unfollow users
+- [x] Follow/unfollow users
 - [x] Notifications (BullMQ + Redis)
 - [x] Real email delivery (resend)
 - [ ] File uploads (Multer + Cloudinary)
-- [ ] API documentation (Swagger)
+- [ ] API documentation (Swagger) (Have started now atleast 1 path will be documented everyday)
 - [ ] Test suite (Jest + Supertest)
 - [ ] Docker support
 
