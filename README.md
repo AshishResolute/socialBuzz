@@ -21,7 +21,7 @@ A backend REST API for a social media platform built with Node.js, Express, and 
 - **Database** — PostgreSQL
 - **Auth** — JWT (Access + Refresh Tokens)
 - **Validation** — Joi
-- **Cache/Queue** — Redis (BullMQ coming soon)
+- **Cache/Queue** — Redis (BullMQ)
 
 ---
 
