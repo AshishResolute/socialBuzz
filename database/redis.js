@@ -1,7 +1,9 @@
 import {Redis} from 'ioredis';
 
 const redisConnection = new Redis({
-    maxRetriesPerRequest:null
+    host: process.env.REDIS_HOST || 'localhost',
+    port: process.env.REDIS_PORT || 6379,
+    maxRetriesPerRequest: null
 })
 
 
