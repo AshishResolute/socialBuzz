@@ -170,7 +170,49 @@ router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
  *           
  */
 
-
+/**
+ * @openapi
+ * /post/editPost/{postId}:
+ *   put:
+ *     description: users can update their post
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: postId
+ *         in: path
+ *         required: true
+ *         description: This should be the id of the post u want to update
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: Provide the content to update your post
+ *                 example: this is my content to update my previous post content
+ *     responses:
+ *       200:
+ *         description: Successfully updates the post content of user and a mail will be sent
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: post updated successfully for user
+ *                 updated_at:
+ *                   type: string
+ *                   example: 2026-08-02T10:55:00.000Z
+ */
 
 
 
