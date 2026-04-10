@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 const currentFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(currentFile);
 
-dotenv.config({path:path.join(__dirname,'../dev.env')})
+dotenv.config({path:process.env.NODE_ENV==='test'? path.join(__dirname,'../test.env'):path.join(__dirname,'../dev.env'),quiet:true})
 
 
 const pool = new Pool({
@@ -16,9 +16,10 @@ const pool = new Pool({
     port:process.env.DB_PORT
 })
 
-pool.query('select now()',(err,res)=>{
-    if(err) return  console.log(`Database Connection Failed,${err.stack}`)
-        console.log(`Database Connected at ${res.rows[0].now}`)
-})
+
+// pool.query('select now()',(err,res)=>{
+//     if(err) return  console.log(`Database Connection Failed,${err.stack}`)
+//         console.log(`Database Connected at ${res.rows[0].now}`)
+// })
 
 export default pool

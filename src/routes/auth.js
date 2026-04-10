@@ -51,7 +51,7 @@ router.post("/signup", authLimitter, async (req, res, next) => {
     );
     if (result.rowCount === 0)
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
-    res.status(200).json({ message: `SignUp Successfull!` });
+    res.status(201).json({ message: `SignUp Successfull!` });
   } catch (err) {
     console.log(`Error:${err}`);
     res.status(500).json({ message: `Internal Server error` });
