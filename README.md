@@ -105,7 +105,7 @@ npm start
 - [x] Real email delivery (resend)
 - [ ] File uploads (Multer + Cloudinary)
 - [ ] API documentation (Swagger) (Have started now atleast 1 path will be documented everyday)
-- [ ] Test suite (Jest + Supertest)
+- [ ] Test suite (Jest + Supertest) (Have started testing and completed the Auth route)
 - [ ] Docker support
 
 ---
