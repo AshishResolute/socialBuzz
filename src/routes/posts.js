@@ -49,7 +49,7 @@ router.post(
         to: process.env.RESEND_USER_ACCOUNT_NAME,
         message: `New post successfully created!`,
       });
-      res.status(200).json({
+      res.status(201).json({
         message: `post made by ${findUser.rows[0].username}`,
         postedAt: postAContent.rows[0].created_at,
       });
