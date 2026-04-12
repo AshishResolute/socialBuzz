@@ -40,7 +40,7 @@ router.post(
       if (findUser.rowCount === 0)
         return next(new AppError(`User not found`, 404));
       let postAContent = await db.query(
-        `insert into posts(content,user_id) values($1,$2) returning user_id,created_at,updated_at`,
+        `insert into posts(content,user_id) values($1,$2) returning user_id,created_at,updated_at ,id`,
         [content, user_id],
       );
       if (postAContent.rowCount === 0)
@@ -51,6 +51,7 @@ router.post(
       });
       res.status(201).json({
         message: `post made by ${findUser.rows[0].username}`,
+        postId:postAContent.rows[0].id,
         postedAt: postAContent.rows[0].created_at,
       });
     } catch (error) {
@@ -72,7 +73,6 @@ router.put(
     try {
       let user_id = req.user.id;
       let post_id = req.params.postId;
-      console.log(post_id);
       let { error, value } = updatedPostContent.validate(req.body);
       if (error) {
         error.details.map((err) => console.log(err.message));
