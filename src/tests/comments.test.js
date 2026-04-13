@@ -1,0 +1,89 @@
+import request from "supertest";
+import { describe, it, expect } from "@jest/globals";
+import app from "../routes/main.js";
+import pool from "../../database/connection.js";
+import redisConnection from "../../database/redis.js";
+import { emailQueue, postQueue } from "../queues/emailQueue.js";
+
+let accessToken, postId;
+
+beforeAll(async () => {
+  await pool.query(`delete from users`);
+  await pool.query(`delete from users`);
+  await pool.query(`delete from posts`);
+  await pool.query(`delete from comments`);
+
+  await request(app)
+    .post("/auth/signup")
+    .send({
+      email: `user@test.com`,
+      password: `User@test.com`,
+      confirmPassword: `User@test.com`,
+      userName: `testUser`,
+    });
+
+  const res = await request(app)
+    .post("/auth/login")
+    .send({ email: `user@test.com`, password: `User@test.com` });
+
+  accessToken = res.body.token;
+
+  const postIdRes = await request(app)
+    .post("/post/content")
+    .set("Authorization", `Bearer ${accessToken}`)
+    .send({ content: `1223` });
+
+  postId = postIdRes.body.postId;
+});
+
+afterAll(async () => {
+  await pool.end();
+  await redisConnection.quit();
+  await emailQueue.close();
+  await postQueue.close();
+});
+
+describe(`Comment routes`, () => {
+  describe(`POST /comment/postComment/:postId`, () => {
+    it(`Should return 400 for an invalid comment `, async () => {
+      const res = await request(app)
+        .post(`/comment/postComment/${postId}`)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ userComment: 123e8 });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty(`message`);
+    });
+
+    it(`Should return 400 for invalid postId`, async () => {
+      const res = await request(app)
+        .post(`/comment/postComment/abcd`)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ userContent: `abcaj` });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty("message");
+    });
+
+    it(`Should return 404 if post not found to make an comment`, async () => {
+      const res = await request(app)
+        .post(`/comment/postComment/${37477373}`)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ userComment: `No comments` });
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body).toHaveProperty("message");
+    });
+
+    it(`Should return 201 if user is able to make comment on a post`, async () => {
+      const res = await request(app)
+        .post(`/comment/postComment/${postId}`)
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ userComment: `Valid Test Comment` });
+
+      console.log(res.body);
+      expect(res.statusCode).toBe(201);
+      expect(res.body).toHaveProperty("message");
+    });
+  });
+});

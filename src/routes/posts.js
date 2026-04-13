@@ -110,7 +110,6 @@ router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
   try {
     let user_id = req.user.id;
     let post_id = parseInt(req.params.postId);
-    console.log(`post_id:${post_id}`)
     if (isNaN(post_id))
       return next(new AppError(`Invalid postId recieved`), 400);
     let findPost = await db.query(`select id from posts where id=$1`, [

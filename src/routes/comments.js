@@ -34,7 +34,7 @@ router.post("/postComment/:postId", verifyToken, async (req, res, next) => {
     );
     if (comment.rowCount === 0)
       return next(new AppError(`Comment not posted,Try Again Later!`, 500));
-    res.status(200).json({
+    res.status(201).json({
       message: `success`,
       commented_at: comment.rows[0].commented_on,
       commentId: comment.rows[0].id,

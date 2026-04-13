@@ -65,7 +65,6 @@ describe(`POST routes`, () => {
   });
 
   describe("PUT /post/editPost/:postId", () => {
-
     it(`Should return 200 for successfully updating post content`, async () => {
       const res = await request(app)
         .put(`/post/editPost/${Number(postId)}`)
@@ -76,28 +75,49 @@ describe(`POST routes`, () => {
       expect(res.body).toHaveProperty("message");
     });
 
-    it(`Should return 400 if post content is invalid`,async()=>{
-
-        const res = await request(app)
+    it(`Should return 400 if post content is invalid`, async () => {
+      const res = await request(app)
         .put(`/post/editPost/${postId}`)
-        .set('Authorization',`Beaarer ${accessToken}`)
-        .send({content:1234})
+        .set("Authorization", `Beaarer ${accessToken}`)
+        .send({ content: 1234 });
 
-        expect(res.statusCode).toBe(400)
-        expect(res.body).toHaveProperty('message')
+      expect(res.statusCode).toBe(400);
+      expect(res.body).toHaveProperty("message");
     });
 
-    it(`Should return 404 if user does not exist`,async()=>{
-
-        const mockFakeUserToken = jwt.sign({id:5678},process.env.JWT_KEY)
-        console.log(mockFakeUserToken)
-        const res = await request(app)
+    it(`Should return 404 if user does not exist`, async () => {
+      const mockFakeUserToken = jwt.sign({ id: 5678 }, process.env.JWT_KEY);
+      console.log(mockFakeUserToken);
+      const res = await request(app)
         .put(`/post/editPost/${postId}`)
-        .set('Authorization',`Bearer ${mockFakeUserToken}`)
-        .send({content:'I am a Fake user'})
+        .set("Authorization", `Bearer ${mockFakeUserToken}`)
+        .send({ content: "I am a Fake user" });
 
-        expect(res.statusCode).toBe(404)
-        expect(res.body).toHaveProperty('message')
-    })
+      expect(res.statusCode).toBe(404);
+      expect(res.body).toHaveProperty("message");
+    });
   });
+
+  describe('DELETE post/delete/:postId',()=>{
+
+    it('Should return 404 if post not found',async()=>{
+
+      const res = await request(app)
+      .delete(`/post/delete/${-1*postId}`)
+      .set('Authorization',`Bearer ${accessToken}`)
+
+      expect(res.statusCode).toBe(404)
+      expect(res.body).toHaveProperty('message')
+    });
+
+    it(`Should return 200 if post is deleted successfully`,async()=>{
+
+      const res = await request(app)
+      .delete(`/post/delete/${postId}`)
+      .set('Authorization',`Bearer ${accessToken}`)
+
+      expect(res.statusCode).toBe(200)
+      expect(res.body).toHaveProperty('message')
+    })
+  })
 });
