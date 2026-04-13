@@ -10,11 +10,12 @@ let postId;
 
 beforeAll(async () => {
   await pool.query(`delete from users`);
+  await pool.query(`delete from posts`);
   await request(app).post("/auth/signup").send({
     email: "user@test.com",
     password: "User@test.com",
     confirmPassword: `User@test.com`,
-    userName: `Test User`,
+    userName: `Test1 User`,
   });
 
   const res = await request(app)
@@ -70,7 +71,8 @@ describe(`POST routes`, () => {
         .put(`/post/editPost/${Number(postId)}`)
         .set("Authorization", `Bearer ${accessToken}`)
         .send({ content: `Updating my Post` });
-      console.log(res.body);
+
+
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty("message");
     });
@@ -87,7 +89,7 @@ describe(`POST routes`, () => {
 
     it(`Should return 404 if user does not exist`, async () => {
       const mockFakeUserToken = jwt.sign({ id: 5678 }, process.env.JWT_KEY);
-      console.log(mockFakeUserToken);
+      
       const res = await request(app)
         .put(`/post/editPost/${postId}`)
         .set("Authorization", `Bearer ${mockFakeUserToken}`)
