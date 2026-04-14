@@ -7,10 +7,10 @@ import {emailQueue} from "../queues/emailQueue.js";
 
 const router = express.Router();
 
-router.post("/likePost/:PostId", verifyToken, async (req, res, next) => {
+router.post("/likePost/:postId", verifyToken, async (req, res, next) => {
   try {
     let user_id = req.user.id;
-    let post_id = parseInt(req.params.PostId);
+    let post_id = parseInt(req.params.postId);
     if (isNaN(post_id)) return next(new AppError(`Invalid Post_id`, 400));
     let findPost = await db.query(`select id from posts where id=$1`, [
       post_id,
@@ -24,7 +24,7 @@ router.post("/likePost/:PostId", verifyToken, async (req, res, next) => {
     
       await emailQueue.add("emailQueue",{to:`${process.env.RESEND_USER_ACCOUNT_NAME}`})
 
-    res.status(200).json({
+    res.status(201).json({
       message: `You successfully liked the post with Id${post_id}`,
       likeId: likeAPost.rows[0].id,
       Liked_at: likeAPost.rows[0].liked_at,
@@ -37,17 +37,17 @@ router.post("/likePost/:PostId", verifyToken, async (req, res, next) => {
   }
 });
 
-router.delete("/unlikePost/:PostId", verifyToken, async (req, res, next) => {
+router.delete("/unlikePost/:postId", verifyToken, async (req, res, next) => {
   try {
     let user_id = req.user.id;
-    let post_id = parseInt(req.params.PostId);
+    let post_id = parseInt(req.params.postId);
     if (isNaN(post_id)) return next(new AppError(`Invalid PostId!`, 400));
     let findPost = await db.query(
       `select id as like_id,post_id from likes where post_id=$1 and user_id=$2`,
       [post_id, user_id],
     );
     if (findPost.rowCount === 0)
-      return next(new AppError(`Post not Found or Liked yet!`, 400));
+      return next(new AppError(`Post not Found or Liked yet!`, 404));
     let deletePost = await db.query(`delete from likes where id=$1`, [
       findPost.rows[0].like_id,
     ]);
