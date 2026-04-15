@@ -32,7 +32,7 @@ create table if not exists comments(
 );
 
 create table if not exists follow(
-    follower_id int references users(id),
-    following_id int references users(id),
+    follower_id int references users(id) on delete cascade,
+    following_id int references users(id) on delete cascade,
     unique(follower_id,following_id)
 );

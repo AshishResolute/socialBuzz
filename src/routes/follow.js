@@ -2,7 +2,6 @@ import express from "express";
 import verifyToken from "../middlewears/verifyToken.js";
 import { AppError } from "../../ErrorHandler/ErrorClass.js";
 import db from "../../database/connection.js";
-import { findSourceMap } from "module";
 
 const router = express.Router();
 
@@ -33,7 +32,7 @@ router.post("/:userId", verifyToken, async (req, res, next) => {
     });
   } catch (err) {
     if (err.code === "23505")
-      return next(new AppError(`You are already follwing!`, 400));
+      return next(new AppError(`You are already following!`, 400));
     console.log(err.message);
     next(err);
   }
