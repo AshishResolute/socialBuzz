@@ -4,7 +4,7 @@ import pool from "../../database/connection.js";
 import redisConnection from "../../database/redis.js";
 import { emailQueue, postQueue } from "../queues/emailQueue.js";
 import app from "../routes/main.js";
-
+import endConnections from '../../jest.globalTearDown.js';
 let token, followingUserId, followingUserToken;
 beforeAll(async () => {
   await pool.query(`delete from follow`);
@@ -62,11 +62,6 @@ afterAll(async () => {
   await pool.query(`delete from posts`);
   await pool.query(`delete from comments`);
   await pool.query(`delete from likes`);
-
-  await pool.end();
-  await redisConnection.quit();
-  await emailQueue.close();
-  await postQueue.close();
 });
 
 describe(`Feed Route`, () => {

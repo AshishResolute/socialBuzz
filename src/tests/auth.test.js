@@ -4,20 +4,13 @@ import {afterAll, beforeAll, describe, expect, test} from '@jest/globals';
 import pool from '../../database/connection.js';
 import redisConnection from '../../database/redis.js';
 import { emailQueue,postQueue } from '../queues/emailQueue.js';
-
+import endConnections from '../../jest.globalTearDown.js';
 
 
 beforeAll(async()=>{
     await pool.query(`delete from users`)
 })
 
-
-afterAll(async()=>{
-    await pool.end(),
-    await redisConnection.quit(),
-    await emailQueue.close(),
-    await postQueue.close()
-})
 
 describe('Auth Routes',()=>{
 

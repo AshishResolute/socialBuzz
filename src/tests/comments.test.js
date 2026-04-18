@@ -4,7 +4,7 @@ import app from "../routes/main.js";
 import pool from "../../database/connection.js";
 import redisConnection from "../../database/redis.js";
 import { emailQueue, postQueue } from "../queues/emailQueue.js";
-
+import endConnections from '../../jest.globalTearDown.js';
 let accessToken, userPostId,userCommentId,CommentIdForUpdate;
 
 beforeAll(async () => {
@@ -36,12 +36,6 @@ beforeAll(async () => {
   userPostId = postIdRes.body.postId;
 });
 
-afterAll(async () => {
-  await pool.end();
-  await redisConnection.quit();
-  await emailQueue.close();
-  await postQueue.close();
-});
 
 describe(`Comment routes`, () => {
 

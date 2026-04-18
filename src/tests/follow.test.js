@@ -4,7 +4,7 @@ import redisConnection from "../../database/redis.js";
 import { emailQueue, postQueue } from "../queues/emailQueue.js";
 import request from "supertest";
 import { describe, it, expect, afterAll } from "@jest/globals";
-
+import endConnections from '../../jest.globalTearDown.js';
 let token, followerID, testUserId;
 
 beforeAll(async () => {
