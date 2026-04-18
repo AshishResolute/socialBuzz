@@ -1,8 +1,6 @@
 # SocialBuzz 🐝
 
-A backend REST API for a social media platform built with Node.js, Express, and PostgreSQL.
-
-> **Note:** This project is currently under active development. Features are being added incrementally.
+A backend REST API for a social media platform built with Node.js, Express, Redis and  PostgreSQL.
 
 ---
 
@@ -11,7 +9,10 @@ A backend REST API for a social media platform built with Node.js, Express, and 
 - **User Authentication** — Signup, login with JWT access and refresh tokens
 - **Posts** — Create and edit posts (ownership-protected)
 - **Likes** — Like and unlike posts with race-condition-safe unique constraints
-
+- **Comments** —  Comment on any Post (Edit or delete comment aswell)
+- **Feed** — Paginated feed of posts from followed users
+- **Follow** — Users can Follow others
+- **Email Notification** — Users can get Email notification through Resend (used Redis with BullMQ) 
 ---
 
 ## Tech Stack
@@ -21,7 +22,11 @@ A backend REST API for a social media platform built with Node.js, Express, and 
 - **Database** — PostgreSQL
 - **Auth** — JWT (Access + Refresh Tokens)
 - **Validation** — Joi
-- **Cache/Queue** — Redis (BullMQ)
+- **Testing** — Jest with SuperTest (80% Test Coverage)
+- **Rate limiting** – Redis
+- **Queue** — BullMQ
+- **Email** — Resend
+- **Containerization** — Docker
 
 ---
 
@@ -32,18 +37,21 @@ A backend REST API for a social media platform built with Node.js, Express, and 
 |--------|----------|-------------|
 | POST | `auth/signUp` | Register a new user |
 | POST | `auth/login` | Login and receive tokens |
+| POST | `auth/refreshToken` | Refresh access tokens with refresh tokens |
 
 ### Posts
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `posts/content` | Create a new post |
 | PUT | `posts/editPost/:postId` | Edit your own post |
+| DELETE | `posts/delete/:postId` | Delete Your own post |
 
 ### Likes
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `likes/likePost/:PostId` | Like a post |
-| DELETE | `likes/unlikePost/:PostId` | Unlike a post |
+| POST | `likes/likePost/:postId` | Like a post |
+| DELETE | `likes/unlikePost/:postId` | Unlike a post |
+| GET | `posts/totalLikes/:postId` | Provides the total likes count for user specific post |
 
 ### Comments
 | Method | Endpoint | Description |
@@ -80,6 +88,9 @@ DB_NAME
 DB_PASSWORD
 DB_USER
 JWT_ACCESS_SECRET=your_access_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+RESEND_API_KEY
+NODE_ENV=development||testing
 ```
 
 ### Run
@@ -105,8 +116,8 @@ npm start
 - [x] Real email delivery (resend)
 - [ ] File uploads (Multer + Cloudinary)
 - [ ] API documentation (Swagger) (Have started now atleast 1 path will be documented everyday)
-- [ ] Test suite (Jest + Supertest) (Have started testing and completed the Auth route)
-- [ ] Docker support
+- [x] Test suite (Jest + Supertest) (Have started testing and completed the Auth route) (80% Test Coverage)
+- [x] Docker support
 
 ---
 
