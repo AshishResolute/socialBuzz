@@ -1,0 +1,60 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: ${{secrets.Db_USER}}
+          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
+          POSTGRES_DB: ${{secrets.DB_NAME}}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create test.env
+        run: |
+          echo "DB_HOST=${{secrets.DB_HOST}}" >> test.env
+          echo "DB_USER=${{secrets.DB_USER}}" >> test.env
+          echo "DB_PASSWORD=${{secrets.DB_PASSWORD}}" >> test.env
+          echo "DB_NAME=${{secrets.DB_NAME}}" >> test.env
+          echo "DB_PORT=${{secrets.DB_PORT}}" >> test.env
+          echo "JWT_KEY=${{secrets.JWT_KEY}}" >> test.env
+          echo "JWT_REFRESH_KEY=${{secrets.JWT_REFRESH_KEY}}" >> test.env
+          echo "SERVER_PORT=${{secrets.SERVER_PORT}}" >> test.env
+          echo "REDIS_HOST=${{secrets.REDIS_HOST}}" >> test.env
+      - name: Run Tests
+        run: npm test
+          
+      
+  
+    
