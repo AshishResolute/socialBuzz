@@ -54,6 +54,11 @@ jobs:
           echo "REDIS_HOST=${{secrets.REDIS_HOST}}" >> test.env
           echo "RESEND_API_KEY=${{secrets.RESEND_API_KEY}}" >> test.env
           echo "RESEND_USER_ACCOUNT_NAME=${{secrets.RESEND_USER_ACCOUNT_NAME}}" >> test.env
+      - name: Run Migrations(create tables)
+        run: psql -h localhost -U ${{secrets.DB_USER}} -d ${{secrets.DB_NAME}} -f database/schema.sql 
+        env:
+          PGPASSWORD: ${{secrets.DB_PASSWORD}}
+          
       - name: Run Tests
         run: npm test
           
