@@ -52,6 +52,8 @@ jobs:
           echo "JWT_REFRESH_KEY=${{secrets.JWT_REFRESH_KEY}}" >> test.env
           echo "SERVER_PORT=${{secrets.SERVER_PORT}}" >> test.env
           echo "REDIS_HOST=${{secrets.REDIS_HOST}}" >> test.env
+          echo "RESEND_API_KEY=${{secrets.RESEND_API_KEY}}" >> test.env
+          echo "RESEND_USER_ACCOUNT_NAME=${{secrets.RESEND_USER_ACCOUNT_NAME}}" >> test.env
       - name: Run Tests
         run: npm test
           
