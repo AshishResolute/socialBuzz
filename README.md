@@ -118,7 +118,7 @@ npm start
 - [ ] API documentation (Swagger) (Have started now atleast 1 path will be documented everyday)
 - [x] Test suite (Jest + Supertest) (Have started testing and completed the Auth route) (80% Test Coverage)
 - [x] Docker support
-
+- [x] ci using GitHub Actions
 ---
 
 ## Author
