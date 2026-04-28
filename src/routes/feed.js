@@ -2,6 +2,7 @@ import express from "express";
 import verifyToken from "../middlewears/verifyToken.js";
 import { AppError } from "../../ErrorHandler/ErrorClass.js";
 import db from "../../database/connection.js";
+import redisConnection from "../../database/redis.js";
 const router = express.Router();
 
 // get all the posts from those who i follow
@@ -14,6 +15,15 @@ router.get("/", verifyToken, async (req, res, next) => {
       return next(new AppError(`Invalid query Parameters provided`, 400));
     let offset = (page - 1) * limit;
     let user_id = req.user.id;
+    const cached = await redisConnection.get(`feed:${user_id}`);
+    if (cached) {
+      return res.status(200).json({
+        success: true,
+        message: `The Posts are:`,
+        posts: JSON.parse(cached),
+        fetched_at: new Date().toLocaleString(),
+      });
+    }
     let getAllPosts = await db.query(
       `select p.id,p.content,u.username,p.created_at,p.updated_at from posts as p join follow as f on p.user_id=f.following_id join users as u on u.id=f.following_id where f.follower_id=$1 order by p.created_at desc limit $2 offset $3`,
       [user_id, limit, offset],
@@ -23,6 +33,12 @@ router.get("/", verifyToken, async (req, res, next) => {
         success: true,
         message: `Nothing to display,Your Following list is empty!`,
       });
+    await redisConnection.set(
+      `feed:${user_id}`,
+      JSON.stringify(getAllPosts.rows),
+      "EX",
+      120,
+    );
     res.status(200).json({
       success: true,
       message: `The Posts are:`,
