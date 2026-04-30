@@ -15,7 +15,7 @@ router.get("/", verifyToken, async (req, res, next) => {
       return next(new AppError(`Invalid query Parameters provided`, 400));
     let offset = (page - 1) * limit;
     let user_id = req.user.id;
-    const cached = await redisConnection.get(`feed:${user_id}`);
+    const cached = await redisConnection.get(`feed:${user_id}:${page}:${limit}`);
     if (cached) {
       return res.status(200).json({
         success: true,
@@ -34,7 +34,7 @@ router.get("/", verifyToken, async (req, res, next) => {
         message: `Nothing to display,Your Following list is empty!`,
       });
     await redisConnection.set(
-      `feed:${user_id}`,
+      `feed:${user_id}:${page}:${limit}`,
       JSON.stringify(getAllPosts.rows),
       "EX",
       120,
