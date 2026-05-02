@@ -30,7 +30,7 @@ router.get("/", verifyToken, async (req, res, next) => {
     );
     if (getAllPosts.rowCount === 0)
     {
-        const recommendedPosts = await db.query(`select p.content,p.created_at from posts as p join likes as l on p.id=l.post_id group by l.post_id,p.content,p.created_at order by count(l.id) desc limit $1`,[limit])
+        const recommendedPosts = await db.query(`select p.content,p.created_at from posts as p join likes as l on p.id=l.post_id where p.user_id!=$1 group by l.post_id,p.content,p.created_at  order by count(l.id) desc limit $2`,[user_id,limit])
        return res.status(200).json({
           success:true,
           Message:`Recommended Posts`,
