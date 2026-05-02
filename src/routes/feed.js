@@ -30,12 +30,18 @@ router.get("/", verifyToken, async (req, res, next) => {
     );
     if (getAllPosts.rowCount === 0)
     {
-        const recommendedPosts = await db.query(`select p.content,p.created_at from posts as p join likes as l on p.id=l.post_id where p.user_id!=$1 group by l.post_id,p.content,p.created_at  order by count(l.id) desc limit $2`,[user_id,limit])
+        const recommendedPosts = await db.query(`select u.username,p.id,p.content,p.created_at,p.updated_at,count(l.id)::int as likes from posts as p join likes as l on p.id=l.post_id join users as u on p.user_id=u.id where p.user_id!=$1 group by l.post_id,p.content,p.created_at,u.username,p.id,p.updated_at  order by count(l.id) desc limit $2`,[user_id,limit])
+        if(recommendedPosts.rowCount===0) return res.status(200).json({
+          success:true,
+          message:`Nothing to show Yet!`,
+          fetched_at:new Date().toLocaleString()
+        })
        return res.status(200).json({
           success:true,
-          Message:`Recommended Posts`,
+          message:`Recommended Posts`,
+          type:`Recommended`,
           posts:recommendedPosts.rows,
-          TimeStamp:new Date().toLocaleString()
+          fetched_at:new Date().toLocaleString()
         })
     }
     await redisConnection.set(
