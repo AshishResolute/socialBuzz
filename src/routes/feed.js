@@ -29,10 +29,15 @@ router.get("/", verifyToken, async (req, res, next) => {
       [user_id, limit, offset],
     );
     if (getAllPosts.rowCount === 0)
-      return res.status(200).json({
-        success: true,
-        message: `Nothing to display,Your Following list is empty!`,
-      });
+    {
+        const recommendedPosts = await db.query(`select p.content,p.created_at from posts as p join likes as l on p.id=l.post_id group by l.post_id,p.content,p.created_at order by count(l.id) desc limit $1`,[limit])
+       return res.status(200).json({
+          success:true,
+          Message:`Recommended Posts`,
+          posts:recommendedPosts.rows,
+          TimeStamp:new Date().toLocaleString()
+        })
+    }
     await redisConnection.set(
       `feed:${user_id}:${page}:${limit}`,
       JSON.stringify(getAllPosts.rows),
