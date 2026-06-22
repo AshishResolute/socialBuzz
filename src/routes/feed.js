@@ -1,8 +1,8 @@
 import express from "express";
 import verifyToken from "../Middlewares/verifyToken.js";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
-import db from "../../database/connection.js";
-import redisConnection from "../../database/redis.js";
+import db from "../database/connection.js";
+import redisConnection from "../database/redis.js";
 const router = express.Router();
 
 // get all the posts from those who i follow

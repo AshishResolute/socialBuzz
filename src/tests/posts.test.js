@@ -1,8 +1,8 @@
 import request from "supertest";
 import { describe, expect, it } from "@jest/globals";
-import pool from "../../database/connection.js";
-import redisConnection from "../../database/redis.js";
-import app from "../routes/main.js";
+import pool from "../database/connection.js";
+import redisConnection from "../database/redis.js";
+import app from "../routes/app.ts";
 import { emailQueue, postQueue } from "../queues/emailQueue.js";
 import endConnections from '../../jest.globalTearDown.js';
 import jwt from "jsonwebtoken";

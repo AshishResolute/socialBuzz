@@ -1,7 +1,7 @@
-import db from "../../database/connection.js";
+import db from "../database/connection.js";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import joi from "joi";
-import redisConnection from "../../database/redis.js";
+import redisConnection from "../database/redis.js";
 
 const validateUserName = joi.object({
   username: joi.string().trim().min(3).max(15).required().messages({

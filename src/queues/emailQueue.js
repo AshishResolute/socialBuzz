@@ -1,5 +1,5 @@
 import { Queue } from "bullmq";
-import redisConnection from "../../database/redis.js";
+import redisConnection from "../database/redis.js";
 
 const emailQueue = new Queue("emailQueue", { connection: redisConnection });
 

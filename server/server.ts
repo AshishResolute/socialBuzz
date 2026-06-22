@@ -1,15 +1,8 @@
-import express from 'express';
-import app from '../src/routes/main.ts';
-import {fileURLToPath} from 'url';
-import path from 'path';
-import dotenv from 'dotenv';
 
-const fileName = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(fileName);
+import app from '../src/routes/app.ts';
+import { SERVER_PORT } from '../src/config.ts';
 
-dotenv.config({path:path.join(__dirname,'../dev.env')});
-
-const PORT = process.env.SERVER_PORT||3000
+const PORT = SERVER_PORT||3000
 
 app.listen(PORT,()=>{
     console.log(`server running at port ${PORT}`)

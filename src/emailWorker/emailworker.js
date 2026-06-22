@@ -1,5 +1,5 @@
 import { Worker } from "bullmq";
-import redisConnection from "../../database/redis.js";
+import redisConnection from "../database/redis.js";
 import resend from "../util/resend.js";
 
 const emailWorker = new Worker(

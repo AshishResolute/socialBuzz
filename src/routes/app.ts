@@ -1,6 +1,7 @@
 import express from "express";
+import db from '../database/connection.js'
 import morgan from "morgan";
-import auth from "./auth.js";
+import auth from "./auth.ts";
 import posts from "./posts.js";
 import likes from "./likes.js";
 import comments from "./comments.js";
@@ -12,7 +13,6 @@ import feed from './feed.js'
 import users from './users.js'
 import type { NextFunction, Request,Response } from "express";
 import { GlobalErrorHandler } from "../Middlewares/globalErrorHandler.ts";
-import { AppError } from "../ErrorHandler/ErrorClass.js";
 const app = express();
 
 app.use(express.json());

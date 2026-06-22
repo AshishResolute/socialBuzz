@@ -1,6 +1,6 @@
 import request from "supertest";
 import { describe, it, expect } from "@jest/globals";
-import app from "../routes/main.js";
+import app from "../routes/app.ts";
 import endConnections from '../../jest.globalTearDown.js';
 import jwt from 'jsonwebtoken'
 describe(`Verify Token middlewear Test`, () => {

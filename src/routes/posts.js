@@ -1,7 +1,7 @@
 import express from "express";
 import verifyToken from "../Middlewares/verifyToken.js";
 import joi from "joi";
-import db from "../../database/connection.js";
+import db from "../database/connection.js";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import { userPostLimitter } from "../rateLimitter/rate-limitter.js";
 import { postQueue } from "../queues/emailQueue.js";

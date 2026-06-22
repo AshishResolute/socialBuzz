@@ -1,6 +1,6 @@
-import app from "../routes/main.js";
-import pool from "../../database/connection.js";
-import redisConnection from "../../database/redis.js";
+import app from "../routes/app.ts";
+import pool from "../database/connection.js";
+import redisConnection from "../database/redis.js";
 import { emailQueue, postQueue } from "../queues/emailQueue.js";
 import request from "supertest";
 import { describe, it, expect, afterAll } from "@jest/globals";
