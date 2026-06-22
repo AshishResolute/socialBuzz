@@ -1,5 +1,5 @@
 import db from "../../database/connection.js";
-import { AppError } from "../../ErrorHandler/ErrorClass.js";
+import { AppError } from "../ErrorHandler/ErrorClass.js";
 import joi from "joi";
 import redisConnection from "../../database/redis.js";
 

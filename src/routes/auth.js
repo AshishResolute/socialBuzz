@@ -3,7 +3,7 @@ import joi from "joi";
 import db from "../../database/connection.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { AppError } from "../../ErrorHandler/ErrorClass.js";
+import { AppError } from "../ErrorHandler/ErrorClass.js";
 import { authLimitter } from "../rateLimitter/rate-limitter.js";
 const router = express.Router();
 

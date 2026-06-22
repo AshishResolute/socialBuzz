@@ -1,4 +1,4 @@
-import { AppError } from "../../ErrorHandler/ErrorClass.js";
+import { AppError } from "../ErrorHandler/ErrorClass.js";
 import jwt from "jsonwebtoken";
 import { fileURLToPath } from "url";
 import path from "path";

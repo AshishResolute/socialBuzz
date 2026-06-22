@@ -1,7 +1,7 @@
 import express from "express";
-import { AppError } from "../../ErrorHandler/ErrorClass.js";
+import { AppError } from "../ErrorHandler/ErrorClass.js";
 import db from "../../database/connection.js";
-import verifyToken from "../middlewears/verifyToken.js";
+import verifyToken from "../Middlewares/verifyToken.js";
 import resend from "../util/resend.js";
 import {emailQueue} from "../queues/emailQueue.js";
 

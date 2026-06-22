@@ -10,6 +10,9 @@ import specs from '../config/swagger.js'
 import swaggerUi from 'swagger-ui-express';
 import feed from './feed.js'
 import users from './users.js'
+import type { NextFunction, Request,Response } from "express";
+import { GlobalErrorHandler } from "../Middlewares/globalErrorHandler.ts";
+import { AppError } from "../ErrorHandler/ErrorClass.js";
 const app = express();
 
 app.use(express.json());
@@ -25,26 +28,19 @@ app.use(morgan("dev"));
  *        description: App is healthy
  */
 
-app.get("/health", generalLimitter, (req, res) => {
-  res.status(200).json({ message: `Services Running Well,All Good!` });
+app.get("/health", generalLimitter, (req:Request, res:Response,next:NextFunction) => {
+  res.status(200).json({ success:true,message: `Services Running Well,All Good!`,timeStamp:new Date().toISOString() });
 });
 
 app.use("/auth", auth);
 app.use("/post", posts);
 app.use("/like", likes);
 app.use("/comment", comments);
-app.use("/follow",follow);
+app.use("/follow",follow)
 app.use("/feed",feed);
 app.use("/",users);
 
 app.use("/api-docs",swaggerUi.serve,swaggerUi.setup(specs))
-app.use((err, req, res, next) => {
-  const status = err.statusCode || 500;
-  const ErrorDetails = {
-    message: err.message || `Internal Server Error`,
-    TimeStamp: new Date().toISOString(),
-  };
-  res.status(status).json(ErrorDetails);
-});
+app.use(GlobalErrorHandler)
 
 export default app;

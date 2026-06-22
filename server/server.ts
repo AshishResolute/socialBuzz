@@ -1,5 +1,5 @@
 import express from 'express';
-import app from '../src/routes/main.js';
+import app from '../src/routes/main.ts';
 import {fileURLToPath} from 'url';
 import path from 'path';
 import dotenv from 'dotenv';
