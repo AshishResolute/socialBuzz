@@ -1,16 +1,18 @@
 import type { Request, Response, NextFunction } from "express";
-import type { SignUpInterface } from "../interfaces/interfaces.ts";
+import type { SignUpInterface,LoginInterface } from "../interfaces/interfaces.ts";
 import joi from "joi";
-import { signUpSchema } from "../Validator/Validator.ts";
+import { signUpSchema,loginSchema } from "../Validator/Validator.ts";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
 import db from "../database/connection.js";
+import jwt from 'jsonwebtoken'
+import { JWT_ACCESS_KEY,JWT_REFRESH_KEY } from "../config.ts";
 
-export const SignUp = async (
+export const signUp = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+):Promise<void> => {
   try {
     let { error, value } = signUpSchema.validate(req.body) as {
       error?: joi.ValidationError;
@@ -33,7 +35,59 @@ export const SignUp = async (
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
     res.status(201).json({ message: `SignUp Successfull!` });
   } catch (err) {
-    console.log(`Error:${err}`);
+    if((err).code==='23505') return res.status(400).json({message:`Account already exists,Try with logging in!`})
     res.status(500).json({ message: `Internal Server error` });
   }
 };
+
+
+export const login = async (req:Request, res:Response, next:NextFunction):Promise<void> => {
+  try {
+    let { error, value } = loginSchema.validate(req.body) as {
+      error?:joi.ValidationError,
+      value:LoginInterface
+    };
+    if (error) {
+      return next(
+        new AppError(`Input Validation Failed,Check entered Details`, 400),
+      );
+    }
+    let { email, password } = value;
+    let findUser = await db.query(`select * from users where email=$1`, [
+      email,
+    ]);
+    if (findUser.rowCount === 0)
+      return res.status(401).json({success:false,message:`The email or password provided is incorrect`})
+    let verifyPassword = await bcrypt.compare(
+      password,
+      findUser.rows[0].password,
+    );
+    if (!verifyPassword)
+      return next(
+        new AppError(`The email or password provided is incorrect`, 400),
+      );
+    let token = await jwt.sign(
+      { id: findUser.rows[0].id, userName: findUser.rows[0].username },
+      JWT_ACCESS_KEY!,// '!' added it here as i am sure the .env will load the variable here it wont be undefined it will always be a string
+      { expiresIn: "15m" },
+    );
+    let refreshToken = await jwt.sign(
+      { id: findUser.rows[0].id },
+      JWT_REFRESH_KEY!,
+      { expiresIn: "7d" },
+    );
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 86400000,
+      sameSite: "strict",
+    });
+    res.status(200).json({
+      message: `Login Success!`,
+      Details: `Welcome Back! ${findUser.rows[0].username}`,
+      token,
+    });
+  } catch (err) {
+    console.error(`Error:${err.messsage}`);
+    next(err);
+  }
+}

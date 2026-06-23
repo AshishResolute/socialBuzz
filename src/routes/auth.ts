@@ -5,76 +5,14 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import { authLimitter } from "../rateLimitter/rate-limitter.js";
-import { SignUp } from "../controllers/auth.controller.ts";
+import { login, signUp } from "../controllers/auth.controller.ts";
 const router = express.Router();
 
 // for signUp i need email,password,confirmPassword,userName => validate every inputs and store hashed Passwords
 
-router.post("/signup", authLimitter, SignUp)
+router.post("/signup", authLimitter, signUp)
 
-let loginSchema = joi.object({
-  email: joi.string().email().required().messages({
-    "string.email": "Enter a valid email",
-  }),
-  password: joi
-    .string()
-    .min(8)
-    .max(28)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must contain at least one uppercase, one lowercase, and one special character",
-    }),
-});
-router.post("/login", authLimitter, async (req, res, next) => {
-  try {
-    let { error, value } = loginSchema.validate(req.body);
-    if (error) {
-      error.details.map((err) => console.log(err.message));
-      return next(
-        new AppError(`Input Validation Failed,Check entered Details`, 400),
-      );
-    }
-    let { email, password } = value;
-    let findUser = await db.query(`select * from users where email=$1`, [
-      email,
-    ]);
-    if (findUser.rowCount === 0)
-      return next(new AppError(`User not Found!`, 404));
-    let verifyPassword = await bcrypt.compare(
-      password,
-      findUser.rows[0].password,
-    );
-    if (!verifyPassword)
-      return next(
-        new AppError(`Passwords Don't match,Try Again Login Failed!`, 400),
-      );
-    let token = await jwt.sign(
-      { id: findUser.rows[0].id, userName: findUser.rows[0].username },
-      process.env.JWT_KEY,
-      { expiresIn: "15m" },
-    );
-    let refreshToken = await jwt.sign(
-      { id: findUser.rows[0].id },
-      process.env.JWT_REFRESH_KEY,
-      { expiresIn: "7d" },
-    );
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      maxAge: 86400000,
-      sameSite: "strict",
-    });
-    res.status(200).json({
-      message: `Login Success!`,
-      Details: `Welcome Back! ${findUser.rows[0].username}`,
-      token,
-    });
-  } catch (err) {
-    console.log(`Error:${err.messsage}`);
-    next(err);
-  }
-});
+router.post("/login", authLimitter, login);
 
 router.post("/refreshToken", async (req, res, next) => {
   try {

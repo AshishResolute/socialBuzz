@@ -4,3 +4,8 @@ export interface SignUpInterface{
     confirmPassword:string,
     userName:string,
 }
+
+export interface LoginInterface{
+    email:string,
+    password:string
+}

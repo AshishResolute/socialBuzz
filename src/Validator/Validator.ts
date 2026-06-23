@@ -34,3 +34,24 @@ export const signUpSchema = joi.object<SignUpInterface>({
     "string.empty": "Username cannot be empty",
   })
 });
+
+
+export const loginSchema = joi.object({
+  email: joi.string().trim().email().required().messages({
+    "string.email": "Enter a valid email",
+    "any.required":"Email is required!",
+    "string.empty":"Email cannot be empty"
+  }),
+  password: joi
+    .string().trim()
+    .min(8)
+    .max(28)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Password must contain at least one uppercase, one lowercase, and one special character",
+        "string.min":"Password must have atleast 8 characters",
+        "string.max":"Password cannot be more than 28 characters"
+    }),
+});
