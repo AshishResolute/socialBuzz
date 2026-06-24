@@ -1,5 +1,4 @@
 import express from "express";
-import db from '../database/connection.js'
 import morgan from "morgan";
 import auth from "./auth.ts";
 import posts from "./posts.js";
@@ -16,7 +15,8 @@ import { GlobalErrorHandler } from "../Middlewares/globalErrorHandler.ts";
 const app = express();
 
 app.use(express.json());
-app.use(morgan("dev"));
+
+app.use(morgan('dev'))
 
 /**
  * @openapi
@@ -25,10 +25,10 @@ app.use(morgan("dev"));
  *    description: Responds if the app is up and running
  *    responses:
  *      '200':
- *        description: App is healthy
+ *        description: App is Working
  */
 
-app.get("/health", generalLimitter, (req:Request, res:Response,next:NextFunction) => {
+app.get("/health", (req:Request, res:Response,next:NextFunction) => {
   res.status(200).json({ success:true,message: `Services Running Well,All Good!`,timeStamp:new Date().toISOString() });
 });
 

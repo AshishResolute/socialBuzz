@@ -1,32 +1,24 @@
 import type { Request, Response, NextFunction } from "express";
-import type { SignUpInterface,LoginInterface } from "../interfaces/interfaces.ts";
-import joi from "joi";
-import { signUpSchema,loginSchema } from "../Validator/Validator.ts";
+import type {
+  SignUpInterface,
+  LoginInterface,
+} from "../interfaces/interfaces.ts";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
 import db from "../database/connection.js";
-import jwt from 'jsonwebtoken'
-import { JWT_ACCESS_KEY,JWT_REFRESH_KEY } from "../config.ts";
+import jwt from "jsonwebtoken";
+import { JWT_ACCESS_KEY, JWT_REFRESH_KEY } from "../config.ts";
 
 export const signUp = async (
-  req: Request,
+  req: Request<{}, {}, SignUpInterface>,
   res: Response,
   next: NextFunction,
-):Promise<void> => {
+): Promise<void> => {
   try {
-    let { error, value } = signUpSchema.validate(req.body) as {
-      error?: joi.ValidationError;
-      value: SignUpInterface;
-    };
-    if (error) {
-      return next(
-        new AppError(`Input Validation Failed!,check entered details`, 400),
-      );
-    }
-    let { email, password, userName } = value;
+    let { email, password, userName } = req.body;
 
     let hashedPassword = await bcrypt.hash(password, 10);
-    
+
     let result = await db.query(
       `insert into users(email,password,userName) values($1,$2,$3)`,
       [email, hashedPassword, userName],
@@ -35,29 +27,36 @@ export const signUp = async (
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
     res.status(201).json({ message: `SignUp Successfull!` });
   } catch (err) {
-    if((err).code==='23505') return res.status(400).json({message:`Account already exists,Try with logging in!`})
+    if (err.code === "23505") {
+      res
+        .status(400)
+        .json({ message: `Account already exists,Try with logging in!` });
+      return;
+    }
     res.status(500).json({ message: `Internal Server error` });
   }
 };
 
-
-export const login = async (req:Request, res:Response, next:NextFunction):Promise<void> => {
+export const login = async (
+  req: Request<{}, {}, LoginInterface>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
   try {
-    let { error, value } = loginSchema.validate(req.body) as {
-      error?:joi.ValidationError,
-      value:LoginInterface
-    };
-    if (error) {
-      return next(
-        new AppError(`Input Validation Failed,Check entered Details`, 400),
-      );
-    }
-    let { email, password } = value;
+    let { email, password } = req.body;
     let findUser = await db.query(`select * from users where email=$1`, [
       email,
     ]);
-    if (findUser.rowCount === 0)
-      return res.status(401).json({success:false,message:`The email or password provided is incorrect`})
+    if (findUser.rowCount === 0) {
+      res
+        .status(401)
+        .json({
+          success: false,
+          message: `The email or password provided is incorrect`,
+        });
+      return;
+    }
+
     let verifyPassword = await bcrypt.compare(
       password,
       findUser.rows[0].password,
@@ -68,7 +67,7 @@ export const login = async (req:Request, res:Response, next:NextFunction):Promis
       );
     let token = await jwt.sign(
       { id: findUser.rows[0].id, userName: findUser.rows[0].username },
-      JWT_ACCESS_KEY!,// '!' added it here as i am sure the .env will load the variable here it wont be undefined it will always be a string
+      JWT_ACCESS_KEY!, // '!' added it here as i am sure the .env will load the variable here it wont be undefined it will always be a string
       { expiresIn: "15m" },
     );
     let refreshToken = await jwt.sign(
@@ -90,4 +89,4 @@ export const login = async (req:Request, res:Response, next:NextFunction):Promis
     console.error(`Error:${err.messsage}`);
     next(err);
   }
-}
+};

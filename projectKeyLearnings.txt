@@ -1,0 +1,5 @@
+1)what happens when res.cookie is used:
+
+-> when the server sends the response back to the client(browser) it adds an property to the response object which goes to the browser
+-> The browser reads the response object and sees the SetCookie prop and does the following parse name,value and optional props provided(security)
+-> The browser stores this in its local cookie storage and sends the cookie in every req when made from the same domain untill it expires

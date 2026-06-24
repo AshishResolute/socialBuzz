@@ -6,13 +6,15 @@ import jwt from "jsonwebtoken";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import { authLimitter } from "../rateLimitter/rate-limitter.js";
 import { login, signUp } from "../controllers/auth.controller.ts";
+import { validate } from "../Middlewares/joiValidator.ts";
+import { loginSchema, signUpSchema } from "../Validator/Validator.ts";
 const router = express.Router();
 
 // for signUp i need email,password,confirmPassword,userName => validate every inputs and store hashed Passwords
 
-router.post("/signup", authLimitter, signUp)
+router.post("/signup", validate({body:signUpSchema}),authLimitter, signUp)
 
-router.post("/login", authLimitter, login);
+router.post("/login",authLimitter,validate({body:loginSchema}), login);
 
 router.post("/refreshToken", async (req, res, next) => {
   try {
