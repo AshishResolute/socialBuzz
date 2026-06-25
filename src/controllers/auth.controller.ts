@@ -85,8 +85,8 @@ export const login = async (
       Details: `Welcome Back! ${findUser.rows[0].username}`,
       token,
     });
-  } catch (err) {
-    console.error(`Error:${err.messsage}`);
-    next(err);
+  } catch (error) {
+    console.error(`Error:${(error as Error).message}`);
+    next(error);
   }
 };

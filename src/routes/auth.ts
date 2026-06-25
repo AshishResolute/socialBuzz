@@ -12,7 +12,7 @@ const router = express.Router();
 
 // for signUp i need email,password,confirmPassword,userName => validate every inputs and store hashed Passwords
 
-router.post("/signup", validate({body:signUpSchema}),authLimitter, signUp)
+router.post("/signup",authLimitter, validate({body:signUpSchema}), signUp)
 
 router.post("/login",authLimitter,validate({body:loginSchema}), login);
 

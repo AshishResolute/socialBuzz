@@ -119,6 +119,7 @@ npm start
 - [x] Test suite (Jest + Supertest) (Have started testing and completed the Auth route) (80% Test Coverage)
 - [x] Docker support
 - [x] ci using GitHub Actions
+- [x] Migrating To Typescript(Currently)
 ---
 
 ## Author
