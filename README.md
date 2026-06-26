@@ -7,11 +7,21 @@ A backend REST API for a social media platform built with Node.js, Express, Redi
 ## Current Features
 
 - **User Authentication** — Signup, login with JWT access and refresh tokens
+
+- **Refresh Token Rotation** — Separate `refresh_token` table with token family 
+chaining via self-referencing `parent_id` FK, bcrypt-hashed token storage, 
+reuse detection with full session revocation on suspected theft
+
 - **Posts** — Create and edit posts (ownership-protected)
+
 - **Likes** — Like and unlike posts with race-condition-safe unique constraints
+
 - **Comments** —  Comment on any Post (Edit or delete comment aswell)
+
 - **Feed** — Paginated feed of posts from followed users
+
 - **Follow** — Users can Follow others
+
 - **Email Notification** — Users can get Email notification through Resend (used Redis with BullMQ) 
 ---
 
