@@ -75,9 +75,10 @@ export const login = async (
       JWT_REFRESH_KEY!,
       { expiresIn: "7d" },
     );
+    
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      maxAge: 86400000,
+      maxAge: 1*60*1000*60*24*7,
       sameSite: "strict",
     });
     res.status(200).json({

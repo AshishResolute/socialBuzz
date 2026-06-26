@@ -36,3 +36,12 @@ create table if not exists follow(
     following_id int references users(id) on delete cascade,
     unique(follower_id,following_id)
 );
+
+create table if not exists refresh_token(
+    id serial primary key,
+    user_id int references users(id) on delete cascade,
+    token_hash varchar(64) not null,
+    parent_id int references refresh_token(id) default null,
+    is_used boolean default false,
+    expires_at timestamp
+);
