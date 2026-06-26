@@ -12,10 +12,11 @@ import feed from './feed.js'
 import users from './users.js'
 import type { NextFunction, Request,Response } from "express";
 import { GlobalErrorHandler } from "../Middlewares/globalErrorHandler.ts";
+import cookieParser from "cookie-parser";
 const app = express();
 
 app.use(express.json());
-
+app.use(cookieParser());
 app.use(morgan('dev'))
 
 /**

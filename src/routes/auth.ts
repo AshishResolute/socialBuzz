@@ -1,8 +1,6 @@
 import express from "express";
-
-import { AppError } from "../ErrorHandler/ErrorClass.js";
 import { authLimitter } from "../rateLimitter/rate-limitter.js";
-import { login, signUp } from "../controllers/auth.controller.ts";
+import { login, refresh, signUp } from "../controllers/auth.controller.ts";
 import { validate } from "../Middlewares/joiValidator.ts";
 import { loginSchema, signUpSchema } from "../Validator/Validator.ts";
 const router = express.Router();
