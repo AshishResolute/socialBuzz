@@ -9,6 +9,7 @@ import db from "../database/connection.js";
 import jwt from "jsonwebtoken";
 import { JWT_ACCESS_KEY, JWT_REFRESH_KEY } from "../config.ts";
 
+
 export const signUp = async (
   req: Request<{}, {}, SignUpInterface>,
   res: Response,
@@ -75,7 +76,9 @@ export const login = async (
       JWT_REFRESH_KEY!,
       { expiresIn: "7d" },
     );
-    
+    const hashedRefreshToken = await bcrypt.hash(refreshToken,10)
+    const exipryTimeInSevenDays = 1*60*1000*60*24*7
+    const insertRefreshToken = await db.query(`insert into refresh_token(user_id,token_hash,expires_at) values($1,$2,$3)`,[findUser.rows[0].id,hashedRefreshToken,(new Date(Date.now()+exipryTimeInSevenDays).toISOString())])
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 1*60*1000*60*24*7,

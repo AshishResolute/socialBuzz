@@ -1,8 +1,5 @@
 import express from "express";
-import joi from "joi";
-import db from "../database/connection.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import { authLimitter } from "../rateLimitter/rate-limitter.js";
 import { login, signUp } from "../controllers/auth.controller.ts";
@@ -16,20 +13,7 @@ router.post("/signup",authLimitter, validate({body:signUpSchema}), signUp)
 
 router.post("/login",authLimitter,validate({body:loginSchema}), login);
 
-router.post("/refreshToken", async (req, res, next) => {
-  try {
-    let refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) return next(new AppError(`No token recieved`, 401));
-    let decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN);
-    let newAccessToken = jwt.sign({ id: decoded.id }, process.env.JWT_KEY, {
-      expiresIn: "15m",
-    });
-    res.json({ newAccessToken });
-  } catch (err) {
-    console.log(`Error Details: ${err.message}`);
-    next(err);
-  }
-});
+router.post('/refresh',refresh)
 
 export default router;
 
