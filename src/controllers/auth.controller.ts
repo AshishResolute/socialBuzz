@@ -107,7 +107,6 @@ export const refresh = async (
 ): Promise<void> => {
   try {
     let refreshToken = req.cookies.refreshToken;
-    console.log(refreshToken)
     if (!refreshToken)
       return next(new AppError(`RefreshToken not recieved`, 400));
 
@@ -117,13 +116,12 @@ export const refresh = async (
       JWT_REFRESH_KEY!,
     ) as UserJWTPayload;
     const checkTokenExists = await db.query(
-      `select * from refresh_token where user_id=$1`,
+      `select * from refresh_token where user_id=$1 order by id desc`,
       [validToken.id],
     );
     if (!checkTokenExists.rowCount)
       return next(new AppError(`Token doesn't exists`, 400));
 
-    console.log(checkTokenExists.rows[0])
     if (checkTokenExists.rows[0].is_used) {
       await db.query(
         `update refresh_token set is_used=$1 where id=$2 or parent_id=$3`,
@@ -133,34 +131,42 @@ export const refresh = async (
         httpOnly: true,
         sameSite: "strict",
       });
+      return
     }
     const newRefreshToken = jwt.sign({ id: validToken.id }, JWT_REFRESH_KEY!);
+    const newAccessToken = jwt.sign({ id: validToken.id }, JWT_ACCESS_KEY!);
     const hashedRefreshToken = await bcrypt.hash(newRefreshToken, 10);
 
     // Now i have to do 2 things update the prev entry token as used and also insert a new refreshToken with parent_id with the prev token id
 
     const updatePrevRefreshTokenDetails = await db.query(
       `update refresh_token set is_used=$1 where user_id=$2`,
-      [true,validToken.id]
+      [true, validToken.id],
     );
-console.log(`updated`)
     const insertNewRefreshToken = await db.query(
-      `insert into refresh_token (user_id,token_hash,parent_id) values($1,$2,$3)`,
-      [validToken.id, hashedRefreshToken, checkTokenExists.rows[0].id]
+      `insert into refresh_token (user_id,token_hash,parent_id,expires_at) values($1,$2,$3,$4)`,
+      [
+        validToken.id,
+        hashedRefreshToken,
+        checkTokenExists.rows[0].id,
+        new Date(Date.now() + 1 * 60 * 1000 * 60 * 24 * 7).toISOString(),
+      ],
     );
-console.log(`inserted`)
-    res.cookie('refreshToken',newRefreshToken,{
-      httpOnly:true,
-      sameSite:'strict',
-      maxAge:1*60*1000*60*24*7
-    })
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      maxAge: 1 * 60 * 1000 * 60 * 24 * 7,
+    });
+    res.json({ newAccessToken });
   } catch (error) {
     console.error((error as Error).message);
     if (error instanceof jwt.TokenExpiredError) {
       console.error(`Token Expired! ,expired_at${error.expiredAt}`);
       return next(new AppError(`Token Expired!`, 401));
     } else if (error instanceof jwt.JsonWebTokenError)
-      return next(new AppError(`Authorization Failed,Error:${error.message}`, 400));
+      return next(
+        new AppError(`Authorization Failed,Error:${error.message}`, 400),
+      );
     next(error);
   }
 };
