@@ -26,3 +26,7 @@ export interface DatabaseError extends Error{
     constraint?:string;
     detail?:string
 }
+
+export interface userNameInterface{
+    username?:string;
+}

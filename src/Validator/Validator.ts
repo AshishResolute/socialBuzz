@@ -1,5 +1,5 @@
 import joi from "joi";
-import type { SignUpInterface } from "../interfaces/interfaces.ts";
+import type { SignUpInterface ,userNameInterface} from "../interfaces/interfaces.ts";
 
 
 
@@ -54,4 +54,12 @@ export const loginSchema = joi.object({
         "string.min":"Password must have atleast 8 characters",
         "string.max":"Password cannot be more than 28 characters"
     }),
+});
+
+export const validateUserNameSchema = joi.object<userNameInterface>({
+  username: joi.string().trim().min(3).max(15).required().messages({
+    "string.min": `Username must have atleast 3 characters`,
+    "string.max": `Username cannot be more than 15 characters`,
+    "string.empty": `Username cannot be empty!`,
+  }),
 });

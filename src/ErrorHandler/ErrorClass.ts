@@ -8,6 +8,6 @@ export class AppError extends Error{
     } 
 }
 
-let  CheckIfDatabaseError = (err:unknown):err is DatabaseError=>{
+export const   CheckIfDatabaseError = (err:unknown):err is DatabaseError=>{
     return err instanceof Error && 'code' in err
 } 
