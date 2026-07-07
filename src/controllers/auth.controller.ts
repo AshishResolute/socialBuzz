@@ -7,9 +7,9 @@ import type {
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
 import db from "../database/connection.js";
-import jwt, { type JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { JWT_ACCESS_KEY, JWT_REFRESH_KEY } from "../config.ts";
-
+import { CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.js";
 export const signUp = async (
   req: Request<{}, {}, SignUpInterface>,
   res: Response,
@@ -28,13 +28,27 @@ export const signUp = async (
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
     res.status(201).json({ message: `SignUp Successfull!` });
   } catch (err) {
-    if (err.code === "23505") {
-      res
-        .status(400)
-        .json({ message: `Account already exists,Try with logging in!` });
+    // if (err.code === "23505") {
+    //   res
+    //     .status(400)
+    //     .json({ message: `Account already exists,Try with logging in!` });
+    //   return;
+    // }
+    if (CheckIfDatabaseError(err)) {
+      if (err.code === "23505") {
+        res
+          .status(400)
+          .json({ success: false, message: `Account already exists!` });
+        return;
+      }
+    }
+    if (err instanceof Error) {
+      console.error(`Standard Application Error`);
+      res.status(500).json({ message: `Internal Server error` });
       return;
     }
-    res.status(500).json({ message: `Internal Server error` });
+    console.error(`Unknown Error:${err}`);
+    next(err)
   }
 };
 
@@ -123,15 +137,15 @@ export const refresh = async (
       return next(new AppError(`Token doesn't exists`, 400));
 
     if (checkTokenExists.rows[0].is_used) {
-      await db.query(
-        `update refresh_token set is_used=$1 where id=$2 or parent_id=$3`,
-        [true, checkTokenExists.rows[0].id, checkTokenExists.rows[0].id],
-      );
+      await db.query(`update refresh_token set is_used=$1 where id=$2 `, [
+        true,
+        validToken.id,
+      ]);
       res.clearCookie("refreshToken", {
         httpOnly: true,
         sameSite: "strict",
       });
-      return
+      return next(new AppError(`Token Theft detected`, 400));
     }
     const newRefreshToken = jwt.sign({ id: validToken.id }, JWT_REFRESH_KEY!);
     const newAccessToken = jwt.sign({ id: validToken.id }, JWT_ACCESS_KEY!);
@@ -140,8 +154,8 @@ export const refresh = async (
     // Now i have to do 2 things update the prev entry token as used and also insert a new refreshToken with parent_id with the prev token id
 
     const updatePrevRefreshTokenDetails = await db.query(
-      `update refresh_token set is_used=$1 where user_id=$2`,
-      [true, validToken.id],
+      `update refresh_token set is_used=$1 where user_id=$2 and id=$3`,
+      [true, validToken.id, checkTokenExists.rows[0].id],
     );
     const insertNewRefreshToken = await db.query(
       `insert into refresh_token (user_id,token_hash,parent_id,expires_at) values($1,$2,$3,$4)`,

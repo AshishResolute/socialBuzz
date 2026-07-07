@@ -2,7 +2,7 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",// typescript looks for all the files here
+    "rootDir": "./",// typescript looks for all the files here
     "outDir": "./dist",// complied js code is present here
 
     // Environment Settings

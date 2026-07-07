@@ -1,4 +1,4 @@
-import jwt, { type JwtPayload } from 'jsonwebtoken'
+import  { type JwtPayload } from 'jsonwebtoken'
 
 
 
@@ -18,4 +18,11 @@ export interface LoginInterface{
 
 export interface UserJWTPayload extends JwtPayload{
     id:number
+}
+
+export interface DatabaseError extends Error{
+    code:string;
+    table?:string;
+    constraint?:string;
+    detail?:string
 }
