@@ -63,3 +63,12 @@ export const validateUserNameSchema = joi.object<userNameInterface>({
     "string.empty": `Username cannot be empty!`,
   }),
 });
+
+export const checkUserContent = joi.object({
+  content: joi.string().trim().min(30).max(800).required().messages({
+    "string.empty": `Post content cannot be empty`,
+    "string.max": `Post maximum characters reached(800) characters allowed`,
+    "string.min":`Content must have atleast 30 characters`,
+    "any.required":`Content cannot be empty!`
+  }),
+});
