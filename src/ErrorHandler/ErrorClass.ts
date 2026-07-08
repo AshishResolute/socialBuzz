@@ -1,3 +1,4 @@
+
 import type { DatabaseError } from "../interfaces/interfaces.ts";
 
 export class AppError extends Error{
@@ -11,3 +12,13 @@ export class AppError extends Error{
 export const   CheckIfDatabaseError = (err:unknown):err is DatabaseError=>{
     return err instanceof Error && 'code' in err
 } 
+
+
+export class ClientError extends Error{
+    constructor(message:string,public statusCode:number,public details:string){
+        super(message)
+        this.name=this.constructor.name
+        this.statusCode=statusCode
+        this.details=details
+    }
+}
