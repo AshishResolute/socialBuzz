@@ -58,7 +58,12 @@ export const createUserPost = async (
 };
 
 export const updateUserPostContent = async (
-  req: AuthenticatedRequest<checkUserPostIdInterface,{},checkUserContentInterface,{}>,
+  req: AuthenticatedRequest<
+    checkUserPostIdInterface,
+    {},
+    checkUserContentInterface,
+    {}
+  >,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
@@ -98,6 +103,60 @@ export const updateUserPostContent = async (
     if (error instanceof Error) {
       console.error(`Standard App Error:${error.message}`);
       next(new AppError(error.message, 500));
+      return;
+    }
+    next(error);
+  }
+};
+
+export const deleteUserPost = async (
+  req: AuthenticatedRequest<checkUserPostIdInterface, {}, {}, {}>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    let user_id = req.user.id;
+    let post_id = req.params.postId;
+    if (isNaN(post_id)) {
+      next(
+        new ClientError(
+          `Invalid postId recieved`,
+          400,
+          `Recieved postId is not a number`,
+        ),
+      );
+      return;
+    }
+    let findPost = await db.query(
+      `select id from posts where id=$1 and user_id=$2`,
+      [post_id, user_id],
+    );
+    if (findPost.rowCount === 0)
+      return next(
+        new ClientError(
+          `Post not found`,
+          404,
+          `If user account deleted this post have`,
+        ),
+      );
+    let deletePost = await db.query(
+      `delete from posts where id=$1 and user_id=$2`,
+      [post_id, user_id],
+    );
+    res.status(200).json({
+      success: false,
+      message: `post deleted successfully!`,
+      timeStamp: new Date().toLocaleString(),
+    });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    }
+    if (error instanceof Error) {
+      console.log(`Error Details:${error.message}`);
+      next(new AppError(`error.message`, 500));
       return;
     }
     next(error);

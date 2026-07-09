@@ -24,6 +24,7 @@ import type { UserJWTPayload } from "../interfaces/interfaces.ts";
 
 const verifyToken = (req: Request, _res: Response, next: NextFunction) => {
   try {
+    console.log(req.headers)
     const auth = req.headers["authorization"];
     if (!auth)
       return next(

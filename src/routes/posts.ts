@@ -1,15 +1,14 @@
 import express from "express";
-import verifyToken from "../Middlewares/verifyToken.js";
-import joi from "joi";
-import db from "../database/connection.js";
-import { AppError } from "../ErrorHandler/ErrorClass.js";
+import verifyToken from "../Middlewares/verifyToken.ts";
+import type {RequestHandler} from 'express'
 import { userPostLimitter } from "../rateLimitter/rate-limitter.js";
-import { postQueue } from "../queues/emailQueue.js";
+// import { postQueue } from "../queues/emailQueue.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import dotenv from "dotenv";
 import {
   createUserPost,
+  deleteUserPost,
   updateUserPostContent,
 } from "../controllers/posts.controller.ts";
 import { validate } from "../Middlewares/joiValidator.ts";
@@ -25,43 +24,23 @@ router.post(
   userPostLimitter,
   verifyToken,
   validate({ body: checkUserContent }),
-  createUserPost,
+  createUserPost as unknown as RequestHandler,
 );
 
 router.put(
   "/editPost/:postId",
   userPostLimitter,
   verifyToken,
-  validate({ params: checkUserPostId ,body: checkUserContent, }),
-  updateUserPostContent,
+  validate({ params: checkUserPostId, body: checkUserContent }),
+  updateUserPostContent as unknown as RequestHandler,
 );
 
-router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
-  try {
-    let user_id = req.user.id;
-    let post_id = parseInt(req.params.postId);
-    if (isNaN(post_id))
-      return next(new AppError(`Invalid postId recieved`), 400);
-    let findPost = await db.query(`select id from posts where id=$1`, [
-      post_id,
-    ]);
-    if (findPost.rowCount === 0)
-      return next(new AppError(`Post not found`, 404));
-    let deletePost = await db.query(
-      `delete from posts where id=$1 and user_id=$2`,
-      [post_id, user_id],
-    );
-    if (deletePost.rowCount === 0)
-      return next(new AppError(`Post not deleted,try again later`, 500));
-    res.status(200).json({
-      message: `post deleted successfully!`,
-      timeStamp: new Date().toLocaleString(),
-    });
-  } catch (err) {
-    console.log(`Error Details:${err.message}`);
-    next(err);
-  }
-});
+router.delete(
+  "/:postId",
+  verifyToken,
+  validate({ params: checkUserPostId }),
+  deleteUserPost as unknown as RequestHandler,
+);
 
 /**
  * @openapi
