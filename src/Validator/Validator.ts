@@ -1,5 +1,5 @@
 import joi from "joi";
-import type { SignUpInterface ,userNameInterface} from "../interfaces/interfaces.ts";
+import type { SignUpInterface ,userNameInterface,checkUserContentInterface,checkUserPostIdInterface} from "../interfaces/interfaces.ts";
 
 
 
@@ -64,7 +64,7 @@ export const validateUserNameSchema = joi.object<userNameInterface>({
   }),
 });
 
-export const checkUserContent = joi.object({
+export const checkUserContent = joi.object<checkUserContentInterface>({
   content: joi.string().trim().min(30).max(800).required().messages({
     "string.empty": `Post content cannot be empty`,
     "string.max": `Post maximum characters reached(800) characters allowed`,
@@ -72,3 +72,11 @@ export const checkUserContent = joi.object({
     "any.required":`Content cannot be empty!`
   }),
 });
+
+export const checkUserPostId = joi.object<checkUserPostIdInterface>({
+  postId:joi.number().integer().positive().required().messages({
+    'any.required':`PostId is required`,
+    'number.base':`PostId must be a valid number`,
+    'number.integer':`PostId must be an integer`
+  })
+})

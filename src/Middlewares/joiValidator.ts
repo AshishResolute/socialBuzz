@@ -9,20 +9,23 @@ interface validationInterface {
 }
 
 export const validate = (schema: validationInterface) => {
-  return async(req: Request, _res: Response, next: NextFunction) => {
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    console.log(schema.body)
     if (schema.body) {
       const { error, value } = schema.body.validate(req.body);
       if (error) return next(new AppError(error.message, 400));
       req.body = value;
-    }  if (schema.query) {
+    }
+    if (schema.query) {
       const { error, value } = schema.query.validate(req.query);
       if (error) return next(new AppError(error.message, 400));
       req.query = value;
-    }  if (schema.params) {
+    }
+    if (schema.params) {
       const { error, value } = schema.params.validate(req.params);
       if (error) return next(new AppError(error.message, 400));
       req.params = value;
     }
-    next()
+    next();
   };
 };

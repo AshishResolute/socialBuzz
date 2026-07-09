@@ -8,62 +8,32 @@ import { postQueue } from "../queues/emailQueue.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import dotenv from "dotenv";
-import { createUserPost } from "../controllers/posts.controller.ts";
+import {
+  createUserPost,
+  updateUserPostContent,
+} from "../controllers/posts.controller.ts";
+import { validate } from "../Middlewares/joiValidator.ts";
+import { checkUserContent, checkUserPostId } from "../Validator/Validator.ts";
 const currentFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(currentFile);
 dotenv.config({ path: path.join(__dirname, "../../dev.env") });
 
 const router = express.Router();
+
 router.post(
   "/content",
   userPostLimitter,
   verifyToken,
-  createUserPost
-)
-
-const updatedPostContent = joi.object({
-  content: joi.string().required(),
-});
+  validate({ body: checkUserContent }),
+  createUserPost,
+);
 
 router.put(
   "/editPost/:postId",
   userPostLimitter,
   verifyToken,
-  async (req, res, next) => {
-    try {
-      let user_id = req.user.id;
-      let post_id = req.params.postId;
-      let { error, value } = updatedPostContent.validate(req.body);
-      if (error) {
-        error.details.map((err) => console.log(err.message));
-        return next(new AppError(`Enter valid text content`, 400));
-      }
-      let findUser = await db.query(
-        `select u.username as username,p.id as post_id from users as u join posts as p on u.id = p.user_id where p.user_id=$1 and p.id=$2`,
-        [user_id, post_id],
-      );
-      if (findUser.rowCount === 0)
-        return next(new AppError(`User not Found!`, 404));
-      let { content } = value;
-      let updatePostContent = await db.query(
-        `update posts set content=$1,updated_at=$2 where id=$3 and user_id=$4 returning updated_at`,
-        [content, new Date().toISOString(), post_id, user_id],
-      );
-      if (updatePostContent.rowCount === 0)
-        return next(new AppError(`Post not Updated,Try Again!`, 500));
-      await postQueue.add("postQueue", {
-        to: process.env.RESEND_USER_ACCOUNT_NAME,
-        message: `Post successfully updated!`,
-      });
-      res.status(200).json({
-        message: `post updated successfuly for ${findUser.rows[0].username}`,
-        updated_at: updatePostContent.rows[0].updated_at,
-      });
-    } catch (error) {
-      console.log(error.message);
-      next(error);
-    }
-  },
+  validate({ params: checkUserPostId ,body: checkUserContent, }),
+  updateUserPostContent,
 );
 
 router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
@@ -75,7 +45,8 @@ router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
     let findPost = await db.query(`select id from posts where id=$1`, [
       post_id,
     ]);
-    if (findPost.rowCount===0) return next(new AppError(`Post not found`, 404));
+    if (findPost.rowCount === 0)
+      return next(new AppError(`Post not found`, 404));
     let deletePost = await db.query(
       `delete from posts where id=$1 and user_id=$2`,
       [post_id, user_id],
@@ -126,7 +97,7 @@ router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
  *                 postedAt:
  *                   type: string
  *                   example: 2026-04-02T10:55:00.000Z
- *           
+ *
  */
 
 /**
@@ -172,14 +143,5 @@ router.delete("/delete/:postId", verifyToken, async (req, res, next) => {
  *                   type: string
  *                   example: 2026-08-02T10:55:00.000Z
  */
-
-
-
-
-
-
-
-
-
 
 export default router;

@@ -40,3 +40,8 @@ export interface AuthenticatedRequest<
 > extends Request<Params, ResBody, ReqBody, ReqQuery> {
   user: UserJWTPayload;
 }
+
+
+export interface checkUserPostIdInterface{
+  postId:number
+}
