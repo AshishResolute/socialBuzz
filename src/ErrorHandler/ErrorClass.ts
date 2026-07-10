@@ -18,7 +18,5 @@ export class ClientError extends Error{
     constructor(message:string,public statusCode:number,public details:string){
         super(message)
         this.name=this.constructor.name
-        this.statusCode=statusCode
-        this.details=details
     }
 }

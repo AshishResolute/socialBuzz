@@ -1,5 +1,5 @@
 import type {Request,Response,NextFunction} from 'express';
-import {AppError} from '../ErrorHandler/ErrorClass.js';
+import {AppError, ClientError} from '../ErrorHandler/ErrorClass.js';
 
 
 interface ErrorMessage{
@@ -16,6 +16,18 @@ export const GlobalErrorHandler = (err:Error,_req:Request,res:Response,_next:Nex
             success:false,
             statusCode:err.statusCode,
             message:err.message
+        }
+        res.status(err.statusCode).json(ErrorDetails)
+        return
+    }
+    else if(err instanceof ClientError){
+        const ErrorDetails:ErrorMessage&{name:string,details:string}={
+            success:false,
+                        name:err.name,
+            statusCode:err.statusCode,
+            message:err.message,
+            details:err.details
+
         }
         res.status(err.statusCode).json(ErrorDetails)
         return

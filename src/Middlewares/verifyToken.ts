@@ -1,32 +1,15 @@
-// import { AppError } from "../ErrorHandler/ErrorClass.js";
-// import jwt from "jsonwebtoken";
-
-// let verifyToken = (req, res, next) => {
-//   // console.log("All Headers:", req.headers);
-// // console.log("Auth Header:", req.headers.authorization);
-//   let auth = req.get("authorization");
-//   if (!auth) return next(new AppError(`Token not Received`, 401));
-//   let token = auth.split(" ")[1];
-//   jwt.verify(token, process.env.JWT_KEY, (err, decode) => {
-//     if (err) return next(new AppError(err.message, 401));
-//     req.user = decode;
-//     next();
-//   });
-// };
-
-// export default verifyToken;
 
 import type { Request, Response, NextFunction } from "express";
-import { ClientError } from "../ErrorHandler/ErrorClass.ts";
+import { AppError, ClientError } from "../ErrorHandler/ErrorClass.ts";
 import jwt from "jsonwebtoken";
 import { JWT_ACCESS_KEY } from "../config.ts";
 import type { UserJWTPayload } from "../interfaces/interfaces.ts";
 
 const verifyToken = (req: Request, _res: Response, next: NextFunction) => {
   try {
-    console.log(req.headers)
     const auth = req.headers["authorization"];
     if (!auth)
+    {
       return next(
         new ClientError(
           `Bad Request`,
@@ -34,6 +17,9 @@ const verifyToken = (req: Request, _res: Response, next: NextFunction) => {
           `Not Authorised,login before to continue!`,
         ),
       );
+      
+    }
+      
     const token = auth.split(" ")[1];
     if (!token || token.trim() === "")
       return next(new ClientError(`Bad Request`, 401, `jwt must be provided!`));

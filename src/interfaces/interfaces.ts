@@ -43,5 +43,9 @@ export interface AuthenticatedRequest<
 
 
 export interface checkUserPostIdInterface{
-  postId:number
+  postId?:string
+}
+
+export interface validateUserCommentInterface{
+  userComment:string
 }

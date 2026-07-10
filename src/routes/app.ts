@@ -4,7 +4,6 @@ import auth from "./auth.ts";
 import posts from "./posts.js";
 import likes from "./likes.js";
 import comments from "./comments.js";
-import { generalLimitter } from "../rateLimitter/rate-limitter.js";
 import follow from './follow.js';
 import specs from '../config/swagger.js'
 import swaggerUi from 'swagger-ui-express';
@@ -29,7 +28,7 @@ app.use(morgan('dev'))
  *        description: App is Working
  */
 
-app.get("/health", (req:Request, res:Response,next:NextFunction) => {
+app.get("/health", (_req:Request, res:Response,_next:NextFunction) => {
   res.status(200).json({ success:true,message: `Services Running Well,All Good!`,timeStamp:new Date().toISOString() });
 });
 

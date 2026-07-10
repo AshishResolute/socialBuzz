@@ -10,7 +10,6 @@ interface validationInterface {
 
 export const validate = (schema: validationInterface) => {
   return async (req: Request, _res: Response, next: NextFunction) => {
-    console.log(schema.body)
     if (schema.body) {
       const { error, value } = schema.body.validate(req.body);
       if (error) return next(new AppError(error.message, 400));
