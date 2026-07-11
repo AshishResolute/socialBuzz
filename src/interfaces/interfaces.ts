@@ -49,3 +49,8 @@ export interface checkUserPostIdInterface{
 export interface validateUserCommentInterface{
   userComment:string
 }
+
+export interface UserPostAndCommentIdInterface{
+  postId?:string;
+  commentId?:string;
+}

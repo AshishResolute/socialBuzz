@@ -1,8 +1,12 @@
 import joi from "joi";
-import type { SignUpInterface ,userNameInterface,checkUserContentInterface,checkUserPostIdInterface,validateUserCommentInterface} from "../interfaces/interfaces.ts";
-
-
-
+import type {
+  SignUpInterface,
+  userNameInterface,
+  checkUserContentInterface,
+  checkUserPostIdInterface,
+  validateUserCommentInterface,
+  UserPostAndCommentIdInterface,
+} from "../interfaces/interfaces.ts";
 
 export const signUpSchema = joi.object<SignUpInterface>({
   email: joi.string().trim().email().required().messages({
@@ -32,18 +36,18 @@ export const signUpSchema = joi.object<SignUpInterface>({
       "Username cannot be more than 15 characters,Try with a shorter Username...",
     "any.required": "Username is required!,Please provide a Username",
     "string.empty": "Username cannot be empty",
-  })
+  }),
 });
-
 
 export const loginSchema = joi.object({
   email: joi.string().trim().email().required().messages({
     "string.email": "Enter a valid email",
-    "any.required":"Email is required!",
-    "string.empty":"Email cannot be empty"
+    "any.required": "Email is required!",
+    "string.empty": "Email cannot be empty",
   }),
   password: joi
-    .string().trim()
+    .string()
+    .trim()
     .min(8)
     .max(28)
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
@@ -51,8 +55,8 @@ export const loginSchema = joi.object({
     .messages({
       "string.pattern.base":
         "Password must contain at least one uppercase, one lowercase, and one special character",
-        "string.min":"Password must have atleast 8 characters",
-        "string.max":"Password cannot be more than 28 characters"
+      "string.min": "Password must have atleast 8 characters",
+      "string.max": "Password cannot be more than 28 characters",
     }),
 });
 
@@ -68,24 +72,36 @@ export const checkUserContent = joi.object<checkUserContentInterface>({
   content: joi.string().trim().min(30).max(800).required().messages({
     "string.empty": `Post content cannot be empty`,
     "string.max": `Post maximum characters reached(800) characters allowed`,
-    "string.min":`Content must have atleast 30 characters`,
-    "any.required":`Content cannot be empty!`
+    "string.min": `Content must have atleast 30 characters`,
+    "any.required": `Content cannot be empty!`,
   }),
 });
 
 export const checkUserPostId = joi.object<checkUserPostIdInterface>({
-  postId:joi.number().integer().positive().required().messages({
-    'any.required':`PostId is required`,
-    'number.base':`PostId must be a valid number`,
-    'number.integer':`PostId must be an integer`
-  })
-})
+  postId: joi.number().integer().positive().required().messages({
+    "any.required": `PostId is required`,
+    "number.base": `PostId must be a valid number`,
+    "number.integer": `PostId must be an integer`,
+  }),
+});
 
 export const validateUserComment = joi.object<validateUserCommentInterface>({
   userComment: joi.string().trim().min(1).max(500).required().messages({
     "string.empty": `Comment cannot be empty`,
     "string.max": `Comment too long(max 500 characters allowed)`,
-    'string.min':`Comment too short!`,
-    'any.required':`Comment cannot be empty`
+    "string.min": `Comment too short!`,
+    "any.required": `Comment cannot be empty`,
   }),
 });
+
+const checkUserParams = joi.number().integer().required().positive().messages({
+  "number.base": `Invalid PostId provided`,
+  "any.required": `PostId is required`,
+  "number.integer": `PostId must be an integer`,
+});
+
+export const verifyUserPostAndCommentId =
+  joi.object<UserPostAndCommentIdInterface>({
+    postId: checkUserParams,
+    commentId: checkUserParams,
+  });

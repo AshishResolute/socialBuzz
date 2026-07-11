@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import type {
   validateUserCommentInterface,
   checkUserPostIdInterface,
+  UserPostAndCommentIdInterface,
 } from "../interfaces/interfaces.ts";
 import db from "../database/connection.js";
 import {
@@ -9,11 +10,12 @@ import {
   CheckIfDatabaseError,
   ClientError,
 } from "../ErrorHandler/ErrorClass.ts";
+
 export const createUserCommentOnPost = async (
   req: Request<checkUserPostIdInterface, {}, validateUserCommentInterface, {}>,
   res: Response,
   next: NextFunction,
-):Promise<void> => {
+): Promise<void> => {
   try {
     let user_id = req.user?.id;
     let post_id = req.params?.postId;
@@ -26,7 +28,7 @@ export const createUserCommentOnPost = async (
         new ClientError(
           `Post not Found!`,
           404,
-          `Post not found,try again later`,
+          `Post not found,try again later`
         ),
       );
     let comment = await db.query(
@@ -47,6 +49,66 @@ export const createUserCommentOnPost = async (
     } else if (error instanceof Error) {
       console.error(`Standard App Error`);
       next(new AppError(error.message, 500));
+      return;
+    }
+    next(error);
+  }
+};
+
+export const deleteUserComment = async (
+req: Request<UserPostAndCommentIdInterface,{},{},{}>,
+  res: Response,
+  next: NextFunction,
+):Promise<void> => {
+  try {
+    let user_id = req.user?.id;
+    let post_id = req.params.postId;
+    let comment_id = req.params.commentId;
+    // let findCommentOnPost = await db.query(
+    //   `select id from comments where post_id=$1 and id=$2 and user_id=$3`,
+    //   [post_id, comment_id, user_id]
+    // );
+    // if (findCommentOnPost.rowCount === 0){
+    //   next(
+    //     new ClientError(
+    //       `Comment not Found`,
+    //       404,
+    //       `Comment already deleted or post doesn't exists now!`,
+    //     )
+    //   );
+    //   return
+    // }
+    let deleteComment = await db.query(
+      `delete from comments where id=$1 and user_id=$2`,
+      [comment_id, user_id]
+    );
+    if(!deleteComment.rowCount){
+      next(new ClientError(`Comment not found`,400,`Comment already deleted or post doesn't exists now,or you dont own the comment!`))
+      return
+    }
+    res.status(200).json({
+      success: true,
+      message: `Comment deleted!`,
+      deleted_at: new Date().toISOString(),
+    });
+     
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      res.status(500).json({
+        success: false,
+        name: error.name,
+        code: error.code,
+        message: error.message,
+        detail: error.detail,
+      });
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard App Error`);
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
       return;
     }
     next(error);
