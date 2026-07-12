@@ -16,7 +16,7 @@ create table if not exists posts(
 
 create table if not exists likes(
     id serial primary key,
-    post_id int references posts(id),
+    post_id int references posts(id) on delete cascade,
     user_id int references users(id) on delete cascade,
     liked_at timestamp default now(),
     unique(post_id,user_id)
@@ -44,4 +44,12 @@ create table if not exists refresh_token(
     parent_id int references refresh_token(id) default null,
     is_used boolean default false,
     expires_at timestamp
+);
+
+create table if not exists comment_likes(
+    id serial primary key,
+    comment_id int references comments(id) on delete cascade,
+    user_id int references users(id) on delete cascade,
+    liked_at timestamp default now(),
+    unique(comment_id,user_id)
 );
