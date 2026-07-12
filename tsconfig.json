@@ -41,6 +41,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "allowJs": true,
-    "allowImportingTsExtensions": true
+    // "allowImportingTsExtensions": true
   }
 }

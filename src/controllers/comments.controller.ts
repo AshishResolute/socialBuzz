@@ -9,7 +9,8 @@ import {
   AppError,
   CheckIfDatabaseError,
   ClientError,
-} from "../ErrorHandler/ErrorClass.ts";
+} from "../ErrorHandler/ErrorClass.js";
+import { Client } from "pg";
 
 export const createUserCommentOnPost = async (
   req: Request<checkUserPostIdInterface, {}, validateUserCommentInterface, {}>,
@@ -28,7 +29,7 @@ export const createUserCommentOnPost = async (
         new ClientError(
           `Post not Found!`,
           404,
-          `Post not found,try again later`
+          `Post not found,try again later`,
         ),
       );
     let comment = await db.query(
@@ -56,10 +57,10 @@ export const createUserCommentOnPost = async (
 };
 
 export const deleteUserComment = async (
-req: Request<UserPostAndCommentIdInterface,{},{},{}>,
+  req: Request<UserPostAndCommentIdInterface, {}, {}, {}>,
   res: Response,
   next: NextFunction,
-):Promise<void> => {
+): Promise<void> => {
   try {
     let user_id = req.user?.id;
     let post_id = req.params.postId;
@@ -79,19 +80,24 @@ req: Request<UserPostAndCommentIdInterface,{},{},{}>,
     //   return
     // }
     let deleteComment = await db.query(
-      `delete from comments where id=$1 and user_id=$2`,
-      [comment_id, user_id]
+      `delete from comments where id=$1 and user_id=$2 and post_id=$3`,
+      [comment_id, user_id, post_id],
     );
-    if(!deleteComment.rowCount){
-      next(new ClientError(`Comment not found`,400,`Comment already deleted or post doesn't exists now,or you dont own the comment!`))
-      return
+    if (!deleteComment.rowCount) {
+      next(
+        new ClientError(
+          `Comment not found`,
+          400,
+          `Comment already deleted or post doesn't exists now,or you dont own the comment!`,
+        ),
+      );
+      return;
     }
     res.status(200).json({
       success: true,
       message: `Comment deleted!`,
       deleted_at: new Date().toISOString(),
     });
-     
   } catch (error) {
     if (CheckIfDatabaseError(error)) {
       console.error(`Database Error:${error.message}`);
@@ -109,6 +115,49 @@ req: Request<UserPostAndCommentIdInterface,{},{},{}>,
         success: false,
         message: error.message,
       });
+      return;
+    }
+    next(error);
+  }
+};
+
+export const updateUserComment = async (
+  req: Request<
+    UserPostAndCommentIdInterface,
+    {},
+    validateUserCommentInterface,
+    {}
+  >,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    let user_id = req.user?.id;
+    let post_id = req.params.postId;
+    let comment_id = req.params.commentId;
+
+    let { userComment } = req.body;
+    let updateComment = await db.query(
+      `update  comments set content=$1,updated_at=$2 where post_id=$3 and id=$4 and user_id=$5 returning id,post_id,updated_at`,
+      [userComment, new Date().toISOString(), post_id, comment_id, user_id],
+    );
+   if(!updateComment.rowCount){
+    next(new ClientError(`Comment not updated`,404,`Comment doesn't exists or isn't your's or the post is deleted!`));
+    return
+   }
+    res.status(200).json({
+      message: `update successfull`,
+      updated_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(error)
+      console.error(`Database Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard App Error:${error.message}`);
+      next(new AppError(error.message, 500));
       return;
     }
     next(error);
