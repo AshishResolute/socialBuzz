@@ -1,5 +1,5 @@
 import type {Request,Response,NextFunction} from 'express';
-import {AppError, ClientError} from '../ErrorHandler/ErrorClass.js';
+import {AppError, ClientError, DataBaseError} from '../ErrorHandler/ErrorClass.js';
 
 
 interface ErrorMessage{
@@ -32,6 +32,17 @@ export const GlobalErrorHandler = (err:Error,_req:Request,res:Response,_next:Nex
         res.status(err.statusCode).json(ErrorDetails)
         return
     }
+    else if(err instanceof DataBaseError){
+            const ErrorDetails:ErrorMessage&{code:string,detail?:string}={
+                success:false,
+                message:err.message,
+                code:err.code,
+                statusCode:err.statusCode,
+                detail:err.detail??err.message
+            }
+            res.status(err.statusCode).json(ErrorDetails)
+            return
+        }
     res.status(500).json({
         success:false,
         message:`Internal Server Error`

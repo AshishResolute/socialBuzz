@@ -1,8 +1,8 @@
 
 import type { Request, Response, NextFunction } from "express";
-import { AppError, ClientError } from "../ErrorHandler/ErrorClass.ts";
+import { AppError, ClientError } from "../ErrorHandler/ErrorClass.js";
 import jwt from "jsonwebtoken";
-import { JWT_ACCESS_KEY } from "../config.ts";
+import { JWT_ACCESS_KEY } from "../config.js";
 import type { UserJWTPayload } from "../interfaces/interfaces.ts";
 
 const verifyToken = (req: Request, _res: Response, next: NextFunction) => {

@@ -9,8 +9,8 @@ import {
   AppError,
   CheckIfDatabaseError,
   ClientError,
+  DataBaseError,
 } from "../ErrorHandler/ErrorClass.js";
-import { Client } from "pg";
 
 export const createUserCommentOnPost = async (
   req: Request<checkUserPostIdInterface, {}, validateUserCommentInterface, {}>,
@@ -141,19 +141,91 @@ export const updateUserComment = async (
       `update  comments set content=$1,updated_at=$2 where post_id=$3 and id=$4 and user_id=$5 returning id,post_id,updated_at`,
       [userComment, new Date().toISOString(), post_id, comment_id, user_id],
     );
-   if(!updateComment.rowCount){
-    next(new ClientError(`Comment not updated`,404,`Comment doesn't exists or isn't your's or the post is deleted!`));
-    return
-   }
+    if (!updateComment.rowCount) {
+      next(
+        new ClientError(
+          `Comment not updated`,
+          404,
+          `Comment doesn't exists or isn't your's or the post is deleted!`,
+        ),
+      );
+      return;
+    }
     res.status(200).json({
       message: `update successfull`,
       updated_at: new Date().toISOString(),
     });
   } catch (error) {
     if (CheckIfDatabaseError(error)) {
-      console.error(error)
+      console.error(error);
       console.error(`Database Error:${error.message}`);
       next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard App Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    }
+    next(error);
+  }
+};
+
+export const likeAComment = async (
+  req: Request<UserPostAndCommentIdInterface>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const user_id = req.user?.id;
+    const comment_id = req.params.commentId;
+  try {
+    
+    // const checkComment = await db.query(`select id from comments where id=$1`, [
+    //   comment_id,
+    // ]);
+    // if (checkComment.rowCount === 0) {
+    //   next(
+    //     new ClientError(
+    //       `Comment not liked`,
+    //       404,
+    //       `Comment not found,or comment deleted`,
+    //     ),
+    //   );
+    //   return;
+    // }
+    const addLikeToComment = await db.query(
+      `insert into comment_likes(comment_id,user_id) values($1,$2) returning id,comment_id,liked_at`,
+      [comment_id, user_id],
+    );
+    if (!addLikeToComment.rowCount) {
+      next(new AppError(`comment not liked!`, 500));
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      message: `Comment Liked!`,
+      liked_at: addLikeToComment.rows[0].liked_at,
+    });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      if(error.code==='23505'){
+        const dislike = await db.query(`delete from comment_likes where comment_id=$1 and user_id=$2`,[comment_id,user_id])
+        res.status(200).json({
+          success:true,
+          message:`Comment like removed`
+        })
+        return
+      }
+      else if(error.code==='23503'){
+        // FK violation as insert failed when no commentId exists
+        res.status(404).json({
+          success:false,
+          message:`comment doesn't exists`,
+          timeStamp:new Date().toISOString()
+        })
+        return
+      }
+      next(new DataBaseError(error.message, error.code, 500, error.detail));
       return;
     } else if (error instanceof Error) {
       console.error(`Standard App Error:${error.message}`);

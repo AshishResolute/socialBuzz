@@ -105,3 +105,12 @@ export const verifyUserPostAndCommentId =
     postId: checkUserParams,
     commentId: checkUserParams,
   });
+
+
+  export const validateCommentId = joi.object<UserPostAndCommentIdInterface>({
+    commentId:joi.number().integer().positive().required().messages({
+      "any.required":`commentId is requied`,
+      "number.integer":`Invalid commentId`,
+      "number.base":`Invalid type recieved for commentId`
+    })
+  })

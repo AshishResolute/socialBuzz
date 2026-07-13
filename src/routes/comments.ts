@@ -5,11 +5,13 @@ import {
   checkUserPostId,
   validateUserComment,
   verifyUserPostAndCommentId,
+  validateCommentId,
 } from "../Validator/Validator.js";
 import {
   createUserCommentOnPost,
   deleteUserComment,
-  updateUserComment
+  likeAComment,
+  updateUserComment,
 } from "../controllers/comments.controller.js";
 
 const router = express.Router();
@@ -25,14 +27,20 @@ router.delete(
   "/:postId/:commentId",
   verifyToken,
   validate({ params: verifyUserPostAndCommentId }),
-  deleteUserComment
+  deleteUserComment,
 );
-
 
 router.patch(
   "/:postId/:commentId",
   verifyToken,
-  validate({params:verifyUserPostAndCommentId,body:validateUserComment}),
-  updateUserComment
+  validate({ params: verifyUserPostAndCommentId, body: validateUserComment }),
+  updateUserComment,
+);
+
+router.post(
+  "/like/:commentId",
+  verifyToken,
+  validate({ params: validateCommentId }),
+  likeAComment,
 );
 export default router;
