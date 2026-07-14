@@ -117,16 +117,6 @@ export const deleteUserPost = async (
   try {
     let user_id = req.user.id;
     let post_id = req.params.postId;
-    if (isNaN(post_id)) {
-      next(
-        new ClientError(
-          `Invalid postId recieved`,
-          400,
-          `Recieved postId is not a number`,
-        ),
-      );
-      return;
-    }
     let findPost = await db.query(
       `select id from posts where id=$1 and user_id=$2`,
       [post_id, user_id],
@@ -139,7 +129,7 @@ export const deleteUserPost = async (
           `If user account deleted this post have`,
         ),
       );
-    let deletePost = await db.query(
+    await db.query(
       `delete from posts where id=$1 and user_id=$2`,
       [post_id, user_id],
     );

@@ -1,6 +1,6 @@
 
 import type { Request, Response, NextFunction } from "express";
-import { AppError, ClientError } from "../ErrorHandler/ErrorClass.js";
+import {  ClientError } from "../ErrorHandler/ErrorClass.js";
 import jwt from "jsonwebtoken";
 import { JWT_ACCESS_KEY } from "../config.js";
 import type { UserJWTPayload } from "../interfaces/interfaces.ts";

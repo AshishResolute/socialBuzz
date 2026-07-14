@@ -8,7 +8,7 @@ import { AppError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
 import db from "../database/connection.js";
 import jwt from "jsonwebtoken";
-import { JWT_ACCESS_KEY, JWT_REFRESH_KEY } from "../config.ts";
+import { JWT_ACCESS_KEY, JWT_REFRESH_KEY } from "../config.js";
 import { CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.js";
 export const signUp = async (
   req: Request<{}, {}, SignUpInterface>,
@@ -153,11 +153,11 @@ export const refresh = async (
 
     // Now i have to do 2 things update the prev entry token as used and also insert a new refreshToken with parent_id with the prev token id
 
-    const updatePrevRefreshTokenDetails = await db.query(
+    await db.query(
       `update refresh_token set is_used=$1 where user_id=$2 and id=$3`,
       [true, validToken.id, checkTokenExists.rows[0].id],
     );
-    const insertNewRefreshToken = await db.query(
+    await db.query(
       `insert into refresh_token (user_id,token_hash,parent_id,expires_at) values($1,$2,$3,$4)`,
       [
         validToken.id,

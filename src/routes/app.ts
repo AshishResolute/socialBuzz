@@ -1,6 +1,6 @@
 import express from "express";
 import morgan from "morgan";
-import auth from "./auth.ts";
+import auth from "./auth.js";
 import posts from "./posts.js";
 import likes from "./likes.js";
 import comments from "./comments.js";
@@ -10,10 +10,12 @@ import swaggerUi from 'swagger-ui-express';
 import feed from './feed.js'
 import users from './users.js'
 import type { NextFunction, Request,Response } from "express";
-import { GlobalErrorHandler } from "../Middlewares/globalErrorHandler.ts";
+import { GlobalErrorHandler } from "../Middlewares/globalErrorHandler.js";
 import cookieParser from "cookie-parser";
+import  expressStatusMonitor  from 'express-status-monitor'
 const app = express();
 
+app.use(expressStatusMonitor());
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'))

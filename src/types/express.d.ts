@@ -7,3 +7,5 @@ declare global {
     }
   }
 }
+
+declare module 'express-status-monitor';

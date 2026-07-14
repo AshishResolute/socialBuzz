@@ -1,5 +1,5 @@
 import db from "../database/connection.js";
-import { AppError, CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.ts";
+import { AppError, CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.js";
 import type { Request, Response, NextFunction } from "express";
 import redisConnection from "../database/redis.js";
 import type { userNameInterface } from "../interfaces/interfaces.ts";

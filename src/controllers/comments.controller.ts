@@ -179,19 +179,15 @@ export const likeAComment = async (
     const comment_id = req.params.commentId;
   try {
     
-    // const checkComment = await db.query(`select id from comments where id=$1`, [
-    //   comment_id,
-    // ]);
-    // if (checkComment.rowCount === 0) {
-    //   next(
-    //     new ClientError(
-    //       `Comment not liked`,
-    //       404,
-    //       `Comment not found,or comment deleted`,
-    //     ),
-    //   );
-    //   return;
-    // }
+    const deleteLike = await db.query(`delete from comment_likes where comment_id=$1 and user_id=$2`,[comment_id,user_id]);
+    if(deleteLike.rowCount){
+      res.status(200).json({
+        success:true,
+        message:`Comment Like removed!`,
+        timeStamp:new Date().toISOString()
+      })
+      return
+    }
     const addLikeToComment = await db.query(
       `insert into comment_likes(comment_id,user_id) values($1,$2) returning id,comment_id,liked_at`,
       [comment_id, user_id],
@@ -209,10 +205,9 @@ export const likeAComment = async (
     if (CheckIfDatabaseError(error)) {
       console.error(`Database Error:${error.message}`);
       if(error.code==='23505'){
-        const dislike = await db.query(`delete from comment_likes where comment_id=$1 and user_id=$2`,[comment_id,user_id])
         res.status(200).json({
           success:true,
-          message:`Comment like removed`
+          message:`Comment liked!`
         })
         return
       }
