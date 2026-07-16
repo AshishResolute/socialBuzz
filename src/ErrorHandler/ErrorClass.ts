@@ -14,7 +14,7 @@ export const   CheckIfDatabaseError = (err:unknown):err is DatabaseError=>{
 } 
 
 export class DataBaseError extends Error{
-    constructor(message:string,public code:string,public statusCode:number,public detail:string,public table:string,public constraint:string ){
+    constructor(message:string,public code:string,public statusCode:number,public detail?:string ){
         super(message)
         this.name=this.constructor.name
     }
