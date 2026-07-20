@@ -106,11 +106,18 @@ export const verifyUserPostAndCommentId =
     commentId: checkUserParams,
   });
 
+export const validateCommentId = joi.object<UserPostAndCommentIdInterface>({
+  commentId: joi.number().integer().positive().required().messages({
+    "any.required": `commentId is required`,
+    "number.integer": `Invalid commentId`,
+    "number.base": `Invalid type recieved for commentId`,
+  }),
+});
 
-  export const validateCommentId = joi.object<UserPostAndCommentIdInterface>({
-    commentId:joi.number().integer().positive().required().messages({
-      "any.required":`commentId is requied`,
-      "number.integer":`Invalid commentId`,
-      "number.base":`Invalid type recieved for commentId`
-    })
-  })
+export const validateUserId = joi.object({
+  userId: joi.number().integer().positive().required().messages({
+    "any.required": `userId is required`,
+    "number.base": `Invalid userId provided!`,
+    "number.integer": `Invalid userId provided`,
+  }),
+});

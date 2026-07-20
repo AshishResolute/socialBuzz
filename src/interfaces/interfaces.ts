@@ -54,3 +54,7 @@ export interface UserPostAndCommentIdInterface{
   postId?:string;
   commentId?:string;
 }
+
+export interface UserIdInterface{
+  userId?:string
+}
