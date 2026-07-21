@@ -1,8 +1,8 @@
 import express from "express";
 import { authLimitter } from "../rateLimitter/rate-limitter.js";
-import { login, refresh, signUp } from "../controllers/auth.controller.ts";
-import { validate } from "../Middlewares/joiValidator.ts";
-import { loginSchema, signUpSchema } from "../Validator/Validator.ts";
+import { login, refresh, signUp } from "../controllers/auth.controller.js";
+import { validate } from "../Middlewares/joiValidator.js";
+import { loginSchema, signUpSchema } from "../Validator/Validator.js";
 const router = express.Router();
 
 // for signUp i need email,password,confirmPassword,userName => validate every inputs and store hashed Passwords
