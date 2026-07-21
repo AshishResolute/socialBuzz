@@ -53,3 +53,8 @@ create table if not exists comment_likes(
     liked_at timestamp default now(),
     unique(comment_id,user_id)
 );
+
+alter table users add display_name varchar(50) not null,
+    bio varchar(200),
+    location varchar(30),
+    socials text[] default '{}'
