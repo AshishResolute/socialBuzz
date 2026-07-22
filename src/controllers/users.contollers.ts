@@ -1,13 +1,23 @@
 import db from "../database/connection.js";
-import { AppError, CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.js";
+import {
+  AppError,
+  CheckIfDatabaseError,
+  ClientError,
+} from "../ErrorHandler/ErrorClass.js";
 import type { Request, Response, NextFunction } from "express";
 import redisConnection from "../database/redis.js";
-import type { userNameInterface } from "../interfaces/interfaces.ts";
+import type {
+  userNameInterface,
+  UserProfileUpdate,
+} from "../interfaces/interfaces.ts";
 
-
-let userInfo = async (req: Request<userNameInterface>, res: Response, next: NextFunction) => {
+export const userInfo = async (
+  req: Request<userNameInterface>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const username = req.params.username as string
+    const username = req.params.username as string;
     // const {username} = req.params
     const cachedUserData = await redisConnection.get(username);
     if (cachedUserData)
@@ -51,4 +61,77 @@ let userInfo = async (req: Request<userNameInterface>, res: Response, next: Next
   }
 };
 
-export default userInfo;
+export const updateUserProfileDetails = async (
+  req: Request<{}, {}, UserProfileUpdate>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  const allowedFields = new Set<string>([
+    "display_name",
+    "location",
+    "socials",
+    "bio",
+  ]);
+  try {
+    const user_id = req.user?.id;
+    if (!user_id) {
+      next(
+        new ClientError(
+          `Unauthorised request`,
+          400,
+          `Login before to continue!`,
+        ),
+      );
+    }
+    let baseQuery = `update users set `;
+    let inputFields: string[] = [];
+    let inputFieldsValues = [];
+    for (const [key, value] of Object.entries(req.body)) {
+      console.log(key);
+      if (allowedFields.has(key)) {
+        inputFields.push(key);
+        inputFieldsValues.push(value);
+      } else {
+        next(
+          new ClientError(
+            `Invalid update details provided`,
+            400,
+            `These fields are not valid!`,
+          ),
+        );
+        return;
+      }
+    }
+      let dynamicQuery: string = "";
+      inputFields.forEach((data, index) => {
+        dynamicQuery += `${data} = $${index + 1}`;
+        if (index+1 !== inputFields.length) dynamicQuery += ", ";
+      });
+      baseQuery +=
+        dynamicQuery + ` where id = $${inputFields.length + 1} returning *`;
+      inputFieldsValues.push(user_id);
+      const updateUserProfile = await db.query(baseQuery, inputFieldsValues);
+      if (!updateUserProfile.rowCount) {
+        res.status(500).json({
+          success: false,
+          message: `Profile not updated!`,
+        });
+      }
+      res.status(200).json({
+        success: true,
+        message: `User Profile updated!`,
+        updated_at: new Date().toISOString(),
+      });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard App Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    }
+    next(error);
+  }
+};
