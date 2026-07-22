@@ -58,3 +58,10 @@ export interface UserPostAndCommentIdInterface{
 export interface UserIdInterface{
   userId?:string
 }
+
+export interface UserProfileUpdate{
+  display_name?:string,
+  location?:string,
+  socials?:string[],
+  bio?:string,
+}

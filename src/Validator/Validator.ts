@@ -6,6 +6,7 @@ import type {
   checkUserPostIdInterface,
   validateUserCommentInterface,
   UserPostAndCommentIdInterface,
+  UserProfileUpdate,
 } from "../interfaces/interfaces.ts";
 
 export const signUpSchema = joi.object<SignUpInterface>({
@@ -121,3 +122,32 @@ export const validateUserId = joi.object({
     "number.integer": `Invalid userId provided`,
   }),
 });
+
+export const validateUserProfileUpdateDetails = joi.object<UserProfileUpdate>({
+  display_name: joi.string().trim().min(3).max(50).messages({
+    "string.min": `Display name too short,minimum 3 characters required`,
+    "string.max": `Display name too long,max 50 characters allowed`,
+    "string.empty": `Provide Display name is empty!`,
+  }),
+  location: joi.string().trim().max(30).messages({
+    "string.max": `location length too long try keeping it short!,max 30 characters allowed`,
+    "string.empty": `Provided location is empty!`,
+  }),
+  socials: joi
+    .array()
+    .items(joi.string().uri({ scheme: ["http", "https"] }))
+    .messages({
+      "string.uri": `Invalid url provided,check again!`,
+      "string.uriCustomScheme": "Only secure http or https links are allowed.",
+    }).max(5).messages({
+      'array.base':`Urls must be passed in an array`,
+      'array.max':`Maximum 5 urls allowed!`
+    }),
+  bio: joi.string().trim().min(3).max(200).messages({
+    "string.min": `Bio too short,minimum 3 characters required`,
+    "string.max": `Bio too long,max 200 characters allowed`,
+    "string.empty": `Bio cannot be empty!`
+  }),
+}).min(1).messages({
+  'object.min':`Provide atleast one field to update`
+}).unknown(false)
