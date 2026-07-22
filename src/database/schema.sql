@@ -54,7 +54,12 @@ create table if not exists comment_likes(
     unique(comment_id,user_id)
 );
 
-alter table users add display_name varchar(50) not null,
-    bio varchar(200),
-    location varchar(30),
-    socials text[] default '{}'
+-- do $$ begin
+    alter table users
+       add column if not exists display_name varchar(50) not null default '',
+       add column if not exists bio varchar(200),
+       add column if not exists socials text[] default '{}',
+       add column if not exists location varchar(30);
+    -- exception 
+    --     when duplicate_column then null;
+-- end $$;
