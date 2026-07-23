@@ -87,7 +87,6 @@ export const updateUserProfileDetails = async (
     let inputFields: string[] = [];
     let inputFieldsValues = [];
     for (const [key, value] of Object.entries(req.body)) {
-      console.log(key);
       if (allowedFields.has(key)) {
         inputFields.push(key);
         inputFieldsValues.push(value);
@@ -110,16 +109,12 @@ export const updateUserProfileDetails = async (
       baseQuery +=
         dynamicQuery + ` where id = $${inputFields.length + 1} returning *`;
       inputFieldsValues.push(user_id);
-      const updateUserProfile = await db.query(baseQuery, inputFieldsValues);
-      if (!updateUserProfile.rowCount) {
-        res.status(500).json({
-          success: false,
-          message: `Profile not updated!`,
-        });
-      }
+      const updateUserProfile = await db.query(baseQuery, inputFieldsValues); 
+      const {id,email,password,username,created_at,...updatedData} = updateUserProfile.rows[0]
       res.status(200).json({
         success: true,
         message: `User Profile updated!`,
+        updated_details:updatedData,
         updated_at: new Date().toISOString(),
       });
   } catch (error) {
