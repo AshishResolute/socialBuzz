@@ -65,3 +65,5 @@ export interface UserProfileUpdate{
   socials?:string[],
   bio?:string,
 }
+
+export type inputFieldsValuesTypes = string|string[]|number

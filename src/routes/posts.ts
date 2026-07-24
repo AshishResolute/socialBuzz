@@ -1,6 +1,6 @@
 import express from "express";
-import verifyToken from "../Middlewares/verifyToken.ts";
-import type {RequestHandler} from 'express'
+import verifyToken from "../Middlewares/verifyToken.js";
+import type { RequestHandler } from "express";
 import { userPostLimitter } from "../rateLimitter/rate-limitter.js";
 // import { postQueue } from "../queues/emailQueue.js";
 import { fileURLToPath } from "url";
@@ -9,10 +9,11 @@ import dotenv from "dotenv";
 import {
   createUserPost,
   deleteUserPost,
+  savePost,
   updateUserPostContent,
-} from "../controllers/posts.controller.ts";
-import { validate } from "../Middlewares/joiValidator.ts";
-import { checkUserContent, checkUserPostId } from "../Validator/Validator.ts";
+} from "../controllers/posts.controller.js";
+import { validate } from "../Middlewares/joiValidator.js";
+import { checkUserContent, checkUserPostId } from "../Validator/Validator.js";
 const currentFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(currentFile);
 dotenv.config({ path: path.join(__dirname, "../../dev.env") });
@@ -42,6 +43,12 @@ router.delete(
   deleteUserPost as unknown as RequestHandler,
 );
 
+router.post(
+  "/:postId/savePost",
+  verifyToken,
+  validate({ params: checkUserPostId }),
+  savePost,
+);
 /**
  * @openapi
  * /post/content:

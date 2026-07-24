@@ -1,4 +1,4 @@
-import type { Response, NextFunction } from "express";
+import type {Request, Response, NextFunction } from "express";
 import db from "../database/connection.js";
 import {
   AppError,
@@ -9,7 +9,8 @@ import type {
   AuthenticatedRequest,
   checkUserContentInterface,
   checkUserPostIdInterface,
-} from "../interfaces/interfaces.ts";
+  UserPostAndCommentIdInterface
+} from "../interfaces/interfaces.js";
 
 export const createUserPost = async (
   req: AuthenticatedRequest<{}, {}, checkUserContentInterface, {}>,
@@ -152,3 +153,52 @@ export const deleteUserPost = async (
     next(error);
   }
 };
+
+
+export const savePost = async(req:Request<UserPostAndCommentIdInterface>,res:Response,next:NextFunction):Promise<void>=>{
+  try{
+    const userId = req.user?.id
+    if(!userId){
+      next(new ClientError(`Unauthorised request`,400,`Login before to continue!`))
+      return
+    }
+    const postId = req.params.postId;
+    const removeBookMark = await db.query(`delete from saved_posts where user_id=$1 and post_id=$2`,[userId,postId]);
+    if(removeBookMark.rowCount){
+      res.status(200).json({
+        success:true,
+        message:`Bookmark removed for this Post`,
+        removed_at:new Date().toISOString()
+      })
+      return
+    }
+    const bookmarkPost = await db.query(`insert into saved_posts(user_id,post_id) values($1,$2)`,[userId,postId])
+    if(bookmarkPost.rowCount) res.status(200).json({
+      success:true,
+      message:`Post bookMarked`,
+      postId,
+      saved_at:new Date().toISOString()
+    })
+    return
+  }
+  catch(error){
+    if(CheckIfDatabaseError(error)){
+      console.error(`Database Error:${error.message}`)
+      if(error.code==='23505'){
+        res.status(200).json({
+          success:true,
+          message:`Post already saved!`
+        })
+        return
+      }
+      next(new AppError(error.message,500))
+      return
+    }
+    else if(error instanceof Error){
+      console.error(`Standard App Error:${error.message}`)
+      next(new AppError(error.message,500))
+      return
+    }
+    next(error)
+  }
+}

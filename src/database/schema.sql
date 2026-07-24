@@ -63,3 +63,11 @@ create table if not exists comment_likes(
     -- exception 
     --     when duplicate_column then null;
 -- end $$;
+
+create table if not exists saved_posts(
+    id serial primary key,
+    post_id int references posts(id) on delete set null,
+    user_id int references users(id) on delete cascade,
+    saved_at timestamp default now(),
+    unique(user_id,post_id)
+);

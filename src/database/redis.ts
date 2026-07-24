@@ -1,8 +1,9 @@
 import {Redis} from 'ioredis';
+import {REDIS_PORT} from '../config.js'
 
 const redisConnection = new Redis({
     host: process.env.REDIS_HOST || 'localhost',
-    port: process.env.REDIS_PORT || 6379,
+    port: REDIS_PORT || 6379,
     maxRetriesPerRequest: null
 })
 

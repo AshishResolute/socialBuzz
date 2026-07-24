@@ -1,6 +1,6 @@
 import {Pool} from 'pg';
 
-import { DB_HOST,DB_NAME,DB_USER,DB_PASSWORD,DB_PORT } from '../config.ts';
+import { DB_HOST,DB_NAME,DB_USER,DB_PASSWORD,DB_PORT } from '../config.js';
 
 const pool = new Pool({
     host:DB_HOST||'127.0.0.1',
