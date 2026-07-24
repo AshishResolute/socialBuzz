@@ -9,6 +9,7 @@ import redisConnection from "../database/redis.js";
 import type {
   userNameInterface,
   UserProfileUpdate,
+  inputFieldsValuesTypes
 } from "../interfaces/interfaces.ts";
 
 export const userInfo = async (
@@ -82,10 +83,11 @@ export const updateUserProfileDetails = async (
           `Login before to continue!`,
         ),
       );
+      return
     }
     let baseQuery = `update users set `;
     let inputFields: string[] = [];
-    let inputFieldsValues = [];
+    let inputFieldsValues:inputFieldsValuesTypes[] = [];
     for (const [key, value] of Object.entries(req.body)) {
       if (allowedFields.has(key)) {
         inputFields.push(key);
@@ -110,7 +112,7 @@ export const updateUserProfileDetails = async (
         dynamicQuery + ` where id = $${inputFields.length + 1} returning *`;
       inputFieldsValues.push(user_id);
       const updateUserProfile = await db.query(baseQuery, inputFieldsValues); 
-      const {id,email,password,username,created_at,...updatedData} = updateUserProfile.rows[0]
+      const {_id,_email,_password,_username,_created_at,...updatedData} = updateUserProfile.rows[0]
       res.status(200).json({
         success: true,
         message: `User Profile updated!`,
