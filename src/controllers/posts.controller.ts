@@ -12,6 +12,7 @@ import type {
   UserPostAndCommentIdInterface
 } from "../interfaces/interfaces.js";
 
+
 export const createUserPost = async (
   req: AuthenticatedRequest<{}, {}, checkUserContentInterface, {}>,
   res: Response,
@@ -196,6 +197,45 @@ export const savePost = async(req:Request<UserPostAndCommentIdInterface>,res:Res
     }
     else if(error instanceof Error){
       console.error(`Standard App Error:${error.message}`)
+      next(new AppError(error.message,500))
+      return
+    }
+    next(error)
+  }
+}
+
+export const getSavedPost = async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
+  try{
+    const userId = req.user?.id
+    if(!userId){
+      next(new ClientError(`Unauthorised request`,400,`Login before to continue!`))
+      return
+    }
+    const userSavedPosts = await db.query(`select p.content,p.created_at from posts as p join saved_posts as s on s.post_id=p.id where s.user_id=$1`,[userId])
+    if(!userSavedPosts.rowCount){
+      res.status(200).json({
+        success:true,
+        message:`BookMark is empty,Saved Posts appears here`,
+        viewed_at:new Date().toISOString()
+      })
+      return
+    }
+    const bookmarkedPosts = userSavedPosts.rows;
+    res.status(200).json({
+      success:true,
+      message:`Saved Posts Count:${bookmarkedPosts.length}`,
+      bookmarkedPosts,
+      viewed_at:new Date().toISOString()
+    })
+  }
+  catch(error){
+    if(CheckIfDatabaseError(error)){
+      console.error(`Database Error:${error.message}`)
+      next(new  AppError(error.message,500))
+      return
+    }
+    else if(error instanceof Error){
+      console.error(`Standard AppError:${error.message}`)
       next(new AppError(error.message,500))
       return
     }

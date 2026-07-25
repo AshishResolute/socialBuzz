@@ -11,6 +11,7 @@ import {
   deleteUserPost,
   savePost,
   updateUserPostContent,
+  getSavedPost,
 } from "../controllers/posts.controller.js";
 import { validate } from "../Middlewares/joiValidator.js";
 import { checkUserContent, checkUserPostId } from "../Validator/Validator.js";
@@ -49,6 +50,8 @@ router.post(
   validate({ params: checkUserPostId }),
   savePost,
 );
+
+router.get("/savedPost", verifyToken, getSavedPost);
 /**
  * @openapi
  * /post/content:
