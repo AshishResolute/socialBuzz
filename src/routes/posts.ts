@@ -12,6 +12,7 @@ import {
   savePost,
   updateUserPostContent,
   getSavedPost,
+  removeBookMark,
 } from "../controllers/posts.controller.js";
 import { validate } from "../Middlewares/joiValidator.js";
 import { checkUserContent, checkUserPostId } from "../Validator/Validator.js";
@@ -52,6 +53,8 @@ router.post(
 );
 
 router.get("/savedPost", verifyToken, getSavedPost);
+
+router.delete('/:postId/savedPost',verifyToken,validate({params:checkUserPostId}),removeBookMark)
 /**
  * @openapi
  * /post/content:

@@ -242,3 +242,37 @@ export const getSavedPost = async(req:Request,res:Response,next:NextFunction):Pr
     next(error)
   }
 }
+
+export const removeBookMark = async(req:Request<UserPostAndCommentIdInterface>,res:Response,next:NextFunction):Promise<void>=>{
+  try{
+    const userId = req.user?.id;
+    if(!userId){
+      next(new ClientError(`Unauthorised request`,401,`Login before to continue!`))
+      return
+    }
+    const postId= req.params.postId;
+    const removeUserBookMark = await db.query(`delete from saved_posts where user_id=$1 and post_id=$2`,[userId,postId]);
+    if(!removeUserBookMark.rowCount){
+      next(new ClientError(`post not found`,400,`post doesnt exists in bookmarks`))
+      return
+    }
+    res.status(200).json({
+      success:true,
+      message:`BookMarked removed for post:${postId}`,
+      removed_at:new Date().toISOString()
+    })
+  }
+  catch(error){
+    if(CheckIfDatabaseError(error)){
+      console.error(`Database Error:${error.message}`)
+      next(new  AppError(error.message,500))
+      return
+    }
+    else if(error instanceof Error){
+      console.error(`Standard AppError:${error.message}`)
+      next(new AppError(error.message,500))
+      return
+    }
+    next(error)
+  }
+}
