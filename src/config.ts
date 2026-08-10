@@ -24,3 +24,9 @@ export const JWT_ACCESS_KEY = process.env.JWT_KEY
 export const JWT_REFRESH_KEY = process.env.JWT_REFRESH_KEY
 
 export const REDIS_PORT = parseInt(process.env.REDIS_PORT!,10)
+
+export const CLOUD_NAME =  process.env.CLOUD_NAME;
+
+export const CLOUD_API_KEY =  process.env.CLOUD_API_KEY;
+
+export const CLOUD_API_SECRET =  process.env.CLOUD_API_SECRET;
