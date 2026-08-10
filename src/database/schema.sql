@@ -71,3 +71,6 @@ create table if not exists saved_posts(
     saved_at timestamp default now(),
     unique(user_id,post_id)
 );
+
+alter table users
+    add column  if not exists profile_picture text default null;

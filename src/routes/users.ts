@@ -9,4 +9,5 @@ const router=express.Router();
 router.get('/user/:username',validate({params:validateUserNameSchema}),userInfo)
 
 router.put('/user/profileUpdate',verifyToken,validate({body:validateUserProfileUpdateDetails}),updateUserProfileDetails)
+
 export default router
