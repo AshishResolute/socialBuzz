@@ -9,7 +9,7 @@ import {
   AppError,
   CheckIfDatabaseError,
   ClientError,
-  DataBaseError,
+  DataBaseErrors,
 } from "../ErrorHandler/ErrorClass.js";
 
 export const createUserCommentOnPost = async (
@@ -220,7 +220,7 @@ export const likeAComment = async (
         })
         return
       }
-      next(new DataBaseError(error.message, error.code, 500, error.detail));
+      next(new DataBaseErrors(error.message, 500, error.code, error.detail));
       return;
     } else if (error instanceof Error) {
       console.error(`Standard App Error:${error.message}`);

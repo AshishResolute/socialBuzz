@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import {
   AppError,
   ClientError,
-  DataBaseError,
+  DataBaseErrors,
 } from "../ErrorHandler/ErrorClass.js";
 
 interface ErrorMessage {
@@ -35,11 +35,11 @@ export const GlobalErrorHandler = (
     };
     res.status(err.statusCode).json(ErrorDetails);
     return;
-  } else if (err instanceof DataBaseError) {
+  } else if (err instanceof DataBaseErrors) {
     const ErrorDetails: ErrorMessage & { code: string; detail?: string } = {
       success: false,
       message: err.message,
-      code: err.code,
+      code: err.code??'500',
       statusCode: err.statusCode,
       detail: err.detail ?? err.message,
     };

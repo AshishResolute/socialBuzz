@@ -3,6 +3,7 @@ import {
   AppError,
   CheckIfDatabaseError,
   ClientError,
+  DataBaseErrors,
 } from "../ErrorHandler/ErrorClass.js";
 import type { Request, Response, NextFunction } from "express";
 import redisConnection from "../database/redis.js";
@@ -12,6 +13,7 @@ import type {
   inputFieldsValuesTypes,
 } from "../interfaces/interfaces.ts";
 import cloudinary from "../util/cloudinary.js";
+import type { UploadApiResponse } from "cloudinary";
 
 export const userInfo = async (
   req: Request<userNameInterface>,
@@ -145,19 +147,33 @@ export const uploadUserProfilePic = async (
       return next(
         new ClientError(`Unauthorised`, 401, `Login before to continue`),
       );
+      if (!req.file?.buffer) {
+      return next(new ClientError("No image provided", 400, "Please upload a profile picture"));
+    }
     const { id: user_id } = req.user;
-    const uploaduserImg = await new Promise((resolve, reject) => {
+    const uploaduserImg = await new Promise<UploadApiResponse>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
           public_id: `User:${user_id}_${Date.now()}Img`,
         },
         (error, data) => {
           if (error) reject(error);
+          else if (!data) reject(new Error("Cloudinary upload returned no result"));
           else resolve(data);
         },
       );
-      stream.end(req.file?.buffer);
+      stream.end(req.file!.buffer);
     });
+
+    const insertUserSecure_URL = await db.query(
+      `UPDATE users 
+SET profile_picture = $1 
+WHERE id = $2;
+`,
+      [uploaduserImg.secure_url,user_id, ],
+    );
+    if (!insertUserSecure_URL.rowCount)
+      return next(new DataBaseErrors(`user secure_url not inserted`, 500));
     res.status(200).json({
       success: true,
       message: `Profile Photo Uploaded!`,
