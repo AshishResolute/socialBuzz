@@ -9,8 +9,9 @@ import redisConnection from "../database/redis.js";
 import type {
   userNameInterface,
   UserProfileUpdate,
-  inputFieldsValuesTypes
+  inputFieldsValuesTypes,
 } from "../interfaces/interfaces.ts";
+import cloudinary from "../util/cloudinary.js";
 
 export const userInfo = async (
   req: Request<userNameInterface>,
@@ -83,11 +84,11 @@ export const updateUserProfileDetails = async (
           `Login before to continue!`,
         ),
       );
-      return
+      return;
     }
     let baseQuery = `update users set `;
     let inputFields: string[] = [];
-    let inputFieldsValues:inputFieldsValuesTypes[] = [];
+    let inputFieldsValues: inputFieldsValuesTypes[] = [];
     for (const [key, value] of Object.entries(req.body)) {
       if (allowedFields.has(key)) {
         inputFields.push(key);
@@ -103,22 +104,65 @@ export const updateUserProfileDetails = async (
         return;
       }
     }
-      let dynamicQuery: string = "";
-      inputFields.forEach((data, index) => {
-        dynamicQuery += `${data} = $${index + 1}`;
-        if (index+1 !== inputFields.length) dynamicQuery += ", ";
-      });
-      baseQuery +=
-        dynamicQuery + ` where id = $${inputFields.length + 1} returning *`;
-      inputFieldsValues.push(user_id);
-      const updateUserProfile = await db.query(baseQuery, inputFieldsValues); 
-      const {_id,_email,_password,_username,_created_at,...updatedData} = updateUserProfile.rows[0]
-      res.status(200).json({
-        success: true,
-        message: `User Profile updated!`,
-        updated_details:updatedData,
-        updated_at: new Date().toISOString(),
-      });
+    let dynamicQuery: string = "";
+    inputFields.forEach((data, index) => {
+      dynamicQuery += `${data} = $${index + 1}`;
+      if (index + 1 !== inputFields.length) dynamicQuery += ", ";
+    });
+    baseQuery +=
+      dynamicQuery + ` where id = $${inputFields.length + 1} returning *`;
+    inputFieldsValues.push(user_id);
+    const updateUserProfile = await db.query(baseQuery, inputFieldsValues);
+    const { _id, _email, _password, _username, _created_at, ...updatedData } =
+      updateUserProfile.rows[0];
+    res.status(200).json({
+      success: true,
+      message: `User Profile updated!`,
+      updated_details: updatedData,
+      updated_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard App Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    }
+    next(error);
+  }
+};
+
+export const uploadUserProfilePic = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user?.id)
+      return next(
+        new ClientError(`Unauthorised`, 401, `Login before to continue`),
+      );
+    const { id: user_id } = req.user;
+    const uploaduserImg = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          public_id: `User:${user_id}_${Date.now()}Img`,
+        },
+        (error, data) => {
+          if (error) reject(error);
+          else resolve(data);
+        },
+      );
+      stream.end(req.file?.buffer);
+    });
+    res.status(200).json({
+      success: true,
+      message: `Profile Photo Uploaded!`,
+      secure_url: uploaduserImg.secure_url,
+    });
   } catch (error) {
     if (CheckIfDatabaseError(error)) {
       console.error(`Database Error:${error.message}`);
