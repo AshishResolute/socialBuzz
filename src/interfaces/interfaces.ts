@@ -67,3 +67,7 @@ export interface UserProfileUpdate{
 }
 
 export type inputFieldsValuesTypes = string|string[]|number
+
+export interface forgotPasswordInterface{
+  email:string
+}

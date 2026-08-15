@@ -7,6 +7,7 @@ import type {
   validateUserCommentInterface,
   UserPostAndCommentIdInterface,
   UserProfileUpdate,
+  forgotPasswordInterface,
 } from "../interfaces/interfaces.ts";
 
 export const signUpSchema = joi.object<SignUpInterface>({
@@ -158,3 +159,11 @@ export const validateUserProfileUpdateDetails = joi
     "object.min": `Provide atleast one field to update`,
   })
   .unknown(false);
+
+export const userEmailValidation = joi.object<forgotPasswordInterface>({
+  email: joi.string().trim().email().required().messages({
+    "string.email": "Please provide an valid email address",
+    "any.required": "Email cannot be empty",
+    "string.empty": "Email is required cannot be empty",
+  }),
+});
