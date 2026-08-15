@@ -128,7 +128,7 @@ npm start
 - [x] Docker support
 - [x] CI using GitHub Actions
 - [x] Migrated to TypeScript
-- [ ] File uploads (Multer + Cloudinary)
+- [x] File uploads (Multer + Cloudinary)
 - [ ] API documentation (Swagger)
 
 ---
