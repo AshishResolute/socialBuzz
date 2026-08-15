@@ -74,3 +74,6 @@ create table if not exists saved_posts(
 
 alter table users
     add column  if not exists profile_picture text default null;
+
+alter table users
+    add column if not exists reset_password_token text default null;

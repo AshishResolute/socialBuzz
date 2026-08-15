@@ -12,4 +12,5 @@ router.get('/user/:username',validate({params:validateUserNameSchema}),userInfo)
 router.put('/user/profileUpdate',verifyToken,validate({body:validateUserProfileUpdateDetails}),updateUserProfileDetails)
 
 router.post('/user/profilePhoto',verifyToken,upload.single('profilePic'),uploadUserProfilePic)
+
 export default router
