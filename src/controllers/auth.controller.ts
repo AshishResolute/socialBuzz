@@ -3,8 +3,9 @@ import type {
   SignUpInterface,
   LoginInterface,
   UserJWTPayload,
+  forgotPasswordInterface
 } from "../interfaces/interfaces.ts";
-import { AppError } from "../ErrorHandler/ErrorClass.js";
+import { AppError,ClientError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
 import db from "../database/connection.js";
 import jwt from "jsonwebtoken";
@@ -184,3 +185,28 @@ export const refresh = async (
     next(error);
   }
 };
+
+
+export const forgotPassword = async(req:Request<{},{},forgotPasswordInterface>,res:Response,next:NextFunction):Promise<void>=>{
+  try{
+    const {email} = req.body
+    const checkIfUserAccountExists = await db.query(`select username from users where email=$1`,[email]);
+    if(checkIfUserAccountExists.rowCount===0){
+      // not a good practice to say if email exists or not,i'll just send a generic message
+      // throw new ClientError('This email is not registered!',404,`Try with another email`)
+      res.status(200).json({
+        success:false,
+        message:`Reset password link has been shared to this email`,
+        timeStamp:new Date().toISOString()
+      })
+    }
+    // now if the user account exists i need to generate a token,more characters more computational work one to build the random string and then to hash them also need to check no dulpicate string or token generation logic?
+    
+  }
+  catch(error){
+    if(error instanceof Error){
+      console.error(error.message)
+    }
+    next(error)
+  }
+}
