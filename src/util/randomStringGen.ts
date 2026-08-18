@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import * as crypto from "node:crypto";
 import { promisify } from "node:util";
 
 // const randomStringToken = (bytes:number):string=>{
@@ -22,9 +22,9 @@ import { promisify } from "node:util";
 // i'll simply use async-await
 // in this the randomBytes dont have support for promises so need to promisify the function returning a promise
 
-const randomBytesAsync = promisify(randomBytes);
+const randomBytesAsync = promisify(crypto.randomBytes);
 
-export const randomStringToken = async (bytes: number): Promise<string> => {
+export const generatePasswordResetToken = async (bytes: number): Promise<string> => {
   try {
     const buffer = await randomBytesAsync(bytes);
     return buffer.toString("hex");
@@ -33,3 +33,11 @@ export const randomStringToken = async (bytes: number): Promise<string> => {
     throw error;
   }
 };
+
+export const hashPasswordResetToken = (plainText:string):string=>{
+  // const hashedToken = crypto.hash('sha256',plainText);
+  // let me use the method that wont crash for older node versions
+  const hashedToken = crypto.createHash('sha256').update(plainText).digest('hex')
+  return hashedToken
+}
+
