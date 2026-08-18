@@ -77,3 +77,6 @@ alter table users
 
 alter table users
     add column if not exists reset_password_token text default null;
+
+alter table users
+    add column if not exists reset_token_expiry TIMESTAMPTZ default null

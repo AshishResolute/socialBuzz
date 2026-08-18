@@ -11,7 +11,7 @@ import db from "../database/connection.js";
 import jwt from "jsonwebtoken";
 import { JWT_ACCESS_KEY, JWT_REFRESH_KEY } from "../config.js";
 import { CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.js";
-import {generatePasswordResetToken} from '../util/randomStringGen.js'
+import {generatePasswordResetToken,hashPasswordResetToken} from '../util/randomStringGen.js'
 export const signUp = async (
   req: Request<{}, {}, SignUpInterface>,
   res: Response,
@@ -206,6 +206,14 @@ export const forgotPassword = async(req:Request<{},{},forgotPasswordInterface>,r
 
      // now i have an reset token i need to hash it before storing it in db
 
+     const hashedToken = hashPasswordResetToken(passwordResetToken);
+
+     if(!hashedToken){
+      next(new AppError(`Internal Server error`,500))
+      return
+     }
+
+     
 
   }
   catch(error){
