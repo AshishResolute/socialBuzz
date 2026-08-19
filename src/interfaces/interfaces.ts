@@ -72,6 +72,11 @@ export interface forgotPasswordInterface{
   email:string
 }
 
-export interface hashedTokenInterface{
-  hashedToken:string
+export interface passwordResetTokenInterface{
+  resetPasswordToken:string
+}
+
+export interface userPasswordInterface{
+  newPassword:string
+  confirmPassword:string
 }

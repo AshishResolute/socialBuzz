@@ -4,6 +4,8 @@ import type {
   LoginInterface,
   UserJWTPayload,
   forgotPasswordInterface,
+  passwordResetTokenInterface,
+  userPasswordInterface,
 } from "../interfaces/interfaces.ts";
 import { AppError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
@@ -209,7 +211,7 @@ export const forgotPassword = async (
         message: `Reset password link has been shared to this email`,
         timeStamp: new Date().toISOString(),
       });
-      return
+      return;
     }
     // now if the user account exists i need to generate a token,more characters more computational work one to build the random string and then to hash them also need to check no dulpicate string or token generation logic?
     const passwordResetToken = await generatePasswordResetToken(32);
@@ -241,6 +243,40 @@ export const forgotPassword = async (
       resetUrl,
       timeStamp: new Date().toISOString(),
     });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
+    next(error);
+  }
+};
+
+export const resetPassword = async (
+  req: Request<passwordResetTokenInterface, {}, userPasswordInterface, {}>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    // first i'll get the plain token from params
+    const { resetPasswordToken: plainToken } = req.params;
+
+    // need to get the password from user 
+
+    const {newPassword:changePassword} = req.body
+    // got the plain token ,need to hash it again and check for user with this hash token
+
+    const hashPlainToken = hashPasswordResetToken(plainToken);
+
+    const findUserWithActiveToken = await db.query(
+      `select reset_password_token,reset_token_expiry from users where reset_password_token=$1 and reset_token_expiry<now() `,
+      [hashPlainToken],
+    );
+
+    // now i have the user with active token i'll let them update their password
+
+    await db.query(`update users set password=$1,reset_token_expiry=$2 where reset_password_token=$3`,[changePassword,null,hashPlainToken]);
+
+    
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);

@@ -8,7 +8,8 @@ import type {
   UserPostAndCommentIdInterface,
   UserProfileUpdate,
   forgotPasswordInterface,
-  hashedTokenInterface,
+  passwordResetTokenInterface,
+  userPasswordInterface,
 } from "../interfaces/interfaces.ts";
 
 export const signUpSchema = joi.object<SignUpInterface>({
@@ -32,7 +33,11 @@ export const signUpSchema = joi.object<SignUpInterface>({
         "Password must have atleast one lowercase,one UPPERCASE and a Special character",
       "any.required": "Password cannot be empty",
     }),
-  confirmPassword: joi.ref("password"),
+  confirmPassword: joi.string().required().valid(joi.ref("password")).messages({
+    "any.only": "Passwords do not match",
+    "any.required": "Please confirm your password",
+    "string.empty": "Confirm password cannot be empty",
+  }),
   userName: joi.string().trim().min(3).max(15).required().messages({
     "string.min": "Username must have atleast 3 characters",
     "string.max":
@@ -169,11 +174,39 @@ export const userEmailValidation = joi.object<forgotPasswordInterface>({
   }),
 });
 
-export const userHashedTokenValidation = joi.object<hashedTokenInterface>({
-  hashedToken: joi.string().trim().length(64).required().messages({
-    "any.required": `hashedToken not provided`,
-    "string.length": `Invalid hashedToken provided`,
-    "string.empty": `hashedToken cannot be empty`,
-    'string.hex':`Invalid hashedToken provided`
-  }),
+export const userHashedTokenValidation =
+  joi.object<passwordResetTokenInterface>({
+    resetPasswordToken: joi.string().trim().length(64).required().messages({
+      "any.required": `hashedToken not provided`,
+      "string.length": `Invalid hashedToken provided`,
+      "string.empty": `hashedToken cannot be empty`,
+      "string.hex": `Invalid hashedToken provided`,
+    }),
+  });
+
+export const userResetPasswordInterface = joi.object<userPasswordInterface>({
+  newPassword: joi
+    .string()
+    .trim()
+    .min(8)
+    .max(28)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
+    .required()
+    .messages({
+      "string.empty": "Password required cannot be empty",
+      "string.min": "Password must have atleast 8 characters",
+      "string.max": "Password cannot be more than 28 characters",
+      "string.pattern.base":
+        "Password must have atleast one lowercase,one UPPERCASE and a Special character",
+      "any.required": "Password cannot be empty",
+    }),
+  confirmPassword: joi
+    .string()
+    .required()
+    .valid(joi.ref("newPassword"))
+    .messages({
+      "any.only": "Passwords do not match",
+      "any.required": "Please confirm your password",
+      "string.empty": "Confirm password cannot be empty",
+    }),
 });

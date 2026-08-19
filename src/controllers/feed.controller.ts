@@ -1,7 +1,7 @@
 import type { Request,Response,NextFunction } from "express";
 import db from '../database/connection.js'
 import { CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.js";
-import { ClientError,AppError } from "../ErrorHandler/ErrorClass.js";
+import { AppError } from "../ErrorHandler/ErrorClass.js";
 
 
 export const userFeed = async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
