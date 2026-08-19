@@ -184,7 +184,7 @@ export const userHashedTokenValidation =
     }),
   });
 
-export const userResetPasswordInterface = joi.object<userPasswordInterface>({
+export const userResetPasswordInterface = joi.object<userPasswordInterface>().keys({
   newPassword: joi
     .string()
     .trim()

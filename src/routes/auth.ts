@@ -1,6 +1,6 @@
 import express from "express";
 import { authLimitter } from "../rateLimitter/rate-limitter.js";
-import { forgotPassword, login, refresh, signUp } from "../controllers/auth.controller.js";
+import { forgotPassword, login, refresh, resetPassword, signUp } from "../controllers/auth.controller.js";
 import { validate } from "../Middlewares/joiValidator.js";
 import { loginSchema, signUpSchema } from "../Validator/Validator.js";
 const router = express.Router();
@@ -15,6 +15,7 @@ router.post('/refresh',refresh)
 
 router.post('/forgotPassword',forgotPassword)
 
+router.post('/resetPassword/:resetPasswordToken',resetPassword)
 export default router;
 
 /**

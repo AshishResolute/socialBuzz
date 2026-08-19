@@ -7,7 +7,7 @@ import type {
   passwordResetTokenInterface,
   userPasswordInterface,
 } from "../interfaces/interfaces.ts";
-import { AppError } from "../ErrorHandler/ErrorClass.js";
+import { AppError, ClientError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
 import db from "../database/connection.js";
 import jwt from "jsonwebtoken";
@@ -260,23 +260,48 @@ export const resetPassword = async (
     // first i'll get the plain token from params
     const { resetPasswordToken: plainToken } = req.params;
 
-    // need to get the password from user 
+    // need to get the password from user
 
-    const {newPassword:changePassword} = req.body
+    const { newPassword: changePassword } = req.body;
     // got the plain token ,need to hash it again and check for user with this hash token
 
     const hashPlainToken = hashPasswordResetToken(plainToken);
 
     const findUserWithActiveToken = await db.query(
-      `select reset_password_token,reset_token_expiry from users where reset_password_token=$1 and reset_token_expiry<now() `,
+      `select reset_password_token,reset_token_expiry from users where reset_password_token=$1`,
       [hashPlainToken],
     );
 
+    console.log(findUserWithActiveToken.rows[0]);
+    if (findUserWithActiveToken.rowCount === 0) {
+      next(
+        new ClientError(
+          `Invalid token provided`,
+          400,
+          `Try again with new token`,
+        ),
+      );
+      return;
+    }
+    const expiry = new Date(findUserWithActiveToken.rows[0].reset_token_expiry);
+    if (expiry.getTime() < Date.now()) {
+      res.status(400).json({ message: `Expired token` });
+      return;
+    }
     // now i have the user with active token i'll let them update their password
+    const hashUserPassword = await bcrypt.hash(changePassword, 10);
 
-    await db.query(`update users set password=$1,reset_token_expiry=$2 where reset_password_token=$3`,[changePassword,null,hashPlainToken]);
-
-    
+    const updateUserPassword = await db.query(
+      `update users set password=$1,reset_token_expiry=$2,reset_password_token=$3 where reset_password_token=$4`,
+      [hashUserPassword, null, null, hashPlainToken],
+    );
+    if (updateUserPassword.rowCount)
+      res.status(200).json({
+        success: true,
+        message: `Password updated successfully,login with the new password`,
+        updated_at: new Date().toISOString(),
+      });
+    else next(new AppError(`Failed to update password`, 500));
   } catch (error) {
     if (error instanceof Error) {
       console.error(error.message);
