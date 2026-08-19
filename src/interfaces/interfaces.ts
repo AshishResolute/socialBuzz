@@ -71,3 +71,7 @@ export type inputFieldsValuesTypes = string|string[]|number
 export interface forgotPasswordInterface{
   email:string
 }
+
+export interface hashedTokenInterface{
+  hashedToken:string
+}

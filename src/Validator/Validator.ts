@@ -8,6 +8,7 @@ import type {
   UserPostAndCommentIdInterface,
   UserProfileUpdate,
   forgotPasswordInterface,
+  hashedTokenInterface,
 } from "../interfaces/interfaces.ts";
 
 export const signUpSchema = joi.object<SignUpInterface>({
@@ -165,5 +166,14 @@ export const userEmailValidation = joi.object<forgotPasswordInterface>({
     "string.email": "Please provide an valid email address",
     "any.required": "Email cannot be empty",
     "string.empty": "Email is required cannot be empty",
+  }),
+});
+
+export const userHashedTokenValidation = joi.object<hashedTokenInterface>({
+  hashedToken: joi.string().trim().length(64).required().messages({
+    "any.required": `hashedToken not provided`,
+    "string.length": `Invalid hashedToken provided`,
+    "string.empty": `hashedToken cannot be empty`,
+    'string.hex':`Invalid hashedToken provided`
   }),
 });
