@@ -1,4 +1,5 @@
 import type {Request, Response, NextFunction } from "express";
+import { postQueue } from "../queues/emailQueue.js";
 import db from "../database/connection.js";
 import {
   AppError,
@@ -14,12 +15,12 @@ import type {
 
 
 export const createUserPost = async (
-  req: AuthenticatedRequest<{}, {}, checkUserContentInterface, {}>,
+  req: Request<{}, {}, checkUserContentInterface, {}>,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const { id: user_id } = req.user;
+    const user_id = req.user?.id
     let { content } = req.body;
     const findUser = await db.query(`select username from users where id=$1`, [
       user_id,
@@ -38,10 +39,10 @@ export const createUserPost = async (
     );
     if (postAContent.rowCount === 0)
       return next(new AppError(`Failed To make a Post`, 500));
-    //   await postQueue.add("postQueue", {
-    //     to: process.env.RESEND_USER_ACCOUNT_NAME,
-    //     message: `New post successfully created!`,
-    //   });
+      await postQueue.add("postQueue", {
+        to: process.env.RESEND_USER_ACCOUNT_NAME,
+        message: `New post successfully created!`,
+      });
     res.status(201).json({
       success: true,
       message: `post made by ${findUser.rows[0].username}`,

@@ -301,6 +301,7 @@ export const resetPassword = async (
         message: `Password updated successfully,login with the new password`,
         updated_at: new Date().toISOString(),
       });
+      // handles race-condition when update returns 0 rows because of any other prev req that already updates the password then the token is invalid
     else next(new AppError(`Failed to update password`, 500));
   } catch (error) {
     if (error instanceof Error) {
