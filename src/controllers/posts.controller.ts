@@ -5,6 +5,7 @@ import {
   AppError,
   CheckIfDatabaseError,
   ClientError,
+  DataBaseErrors,
 } from "../ErrorHandler/ErrorClass.js";
 import type {
   AuthenticatedRequest,
@@ -22,17 +23,19 @@ export const createUserPost = async (
   try {
     const user_id = req.user?.id
     let { content } = req.body;
-    const findUser = await db.query(`select username from users where id=$1`, [
-      user_id,
-    ]);
-    if (findUser.rowCount === 0)
-      return next(
-        new ClientError(
-          `User not found`,
-          404,
-          `User account not found or deleted!`,
-        ),
-      );
+    // const findUser = await db.query(`select username from users where id=$1`, [
+    //   user_id,
+    // ]);
+    // if (findUser.rowCount === 0)
+    //   return next(
+    //     new ClientError(
+    //       `User not found`,
+    //       404,
+    //       `User account not found or deleted!`,
+    //     ),
+    //   ); 
+
+     // remoing the first unnecessary db search will rely on foriegn key constraint if user doesnt exists it just throws a error no need to check if user exists
     const postAContent = await db.query(
       `insert into posts(content,user_id) values($1,$2) returning user_id,created_at,updated_at ,id`,
       [content, user_id],
@@ -45,13 +48,16 @@ export const createUserPost = async (
       });
     res.status(201).json({
       success: true,
-      message: `post made by ${findUser.rows[0].username}`,
+      message: `Your content has been posted`,
       postId: postAContent.rows[0].id,
       postedAt: postAContent.rows[0].created_at,
     });
   } catch (error) {
     if (CheckIfDatabaseError(error)) {
       console.error(`Database error ,${(error.message, error.detail)}`);
+      if(error.code==='23503'){
+        next(new DataBaseErrors(`user account no longer exists`,401,'23503','Foreign key violation'))
+      }
       return next(new AppError(error.message, 500));
     } else if (error instanceof Error) {
       console.error(`Standard App error: ${error.message}`);

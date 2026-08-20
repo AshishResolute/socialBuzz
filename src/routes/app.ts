@@ -12,10 +12,10 @@ import users from './users.js'
 import type { NextFunction, Request,Response } from "express";
 import { GlobalErrorHandler } from "../Middlewares/globalErrorHandler.js";
 import cookieParser from "cookie-parser";
-import  expressStatusMonitor  from 'express-status-monitor'
+// import  expressStatusMonitor  from 'express-status-monitor'
 const app = express();
 
-app.use(expressStatusMonitor());
+// app.use(expressStatusMonitor());
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('dev'))
