@@ -56,7 +56,7 @@ export const createUserPost = async (
     if (CheckIfDatabaseError(error)) {
       console.error(`Database error ,${(error.message, error.detail)}`);
       if(error.code==='23503'){
-        next(new DataBaseErrors(`user account no longer exists`,401,'23503','Foreign key violation'))
+        return next(new DataBaseErrors(`user account no longer exists`,401,'23503','Foreign key violation'))
       }
       return next(new AppError(error.message, 500));
     } else if (error instanceof Error) {

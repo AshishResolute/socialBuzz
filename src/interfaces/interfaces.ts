@@ -80,3 +80,19 @@ export interface userPasswordInterface{
   newPassword:string
   confirmPassword:string
 }
+
+export interface User{
+  id:number;
+  email:string;
+  password:string;
+  username:string;
+  display_name:string;
+  bio:string|null;
+  socials:string[];
+  location:string|null;
+  profile_picture:string|null;
+  reset_password_token:string|null;
+  reset_token_expiry:Date|null;
+  created_at:Date;
+  updated_at:Date;
+}
