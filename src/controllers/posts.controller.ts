@@ -1,4 +1,4 @@
-import type {Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { postQueue } from "../queues/emailQueue.js";
 import db from "../database/connection.js";
 import {
@@ -11,9 +11,10 @@ import type {
   AuthenticatedRequest,
   checkUserContentInterface,
   checkUserPostIdInterface,
-  UserPostAndCommentIdInterface
+  User,
+  UserPostAndCommentIdInterface,
 } from "../interfaces/interfaces.js";
-
+import type { QueryResult } from "pg";
 
 export const createUserPost = async (
   req: Request<{}, {}, checkUserContentInterface, {}>,
@@ -21,7 +22,7 @@ export const createUserPost = async (
   next: NextFunction,
 ) => {
   try {
-    const user_id = req.user?.id
+    const user_id = req.user?.id;
     let { content } = req.body;
     // const findUser = await db.query(`select username from users where id=$1`, [
     //   user_id,
@@ -33,30 +34,38 @@ export const createUserPost = async (
     //       404,
     //       `User account not found or deleted!`,
     //     ),
-    //   ); 
+    //   );
 
-     // remoing the first unnecessary db search will rely on foriegn key constraint if user doesnt exists it just throws a error no need to check if user exists
-    const postAContent = await db.query(
+    // removing the first unnecessary db search ,will rely on foreign key constraint if user doesnt exists it just throws a error no need to check if user exists
+    const postAContent: QueryResult<User> = await db.query(
       `insert into posts(content,user_id) values($1,$2) returning user_id,created_at,updated_at ,id`,
       [content, user_id],
     );
-    if (postAContent.rowCount === 0)
+    if (postAContent.rowCount === 0 || !postAContent.rows[0])
       return next(new AppError(`Failed To make a Post`, 500));
-      await postQueue.add("postQueue", {
-        to: process.env.RESEND_USER_ACCOUNT_NAME,
-        message: `New post successfully created!`,
-      });
+    await postQueue.add("postQueue", {
+      to: process.env.RESEND_USER_ACCOUNT_NAME,
+      message: `New post successfully created!`,
+    });
+    const userData = postAContent.rows[0];
     res.status(201).json({
       success: true,
       message: `Your content has been posted`,
-      postId: postAContent.rows[0].id,
-      postedAt: postAContent.rows[0].created_at,
+      postId: userData.id,
+      postedAt: userData.created_at,
     });
   } catch (error) {
     if (CheckIfDatabaseError(error)) {
       console.error(`Database error ,${(error.message, error.detail)}`);
-      if(error.code==='23503'){
-        return next(new DataBaseErrors(`user account no longer exists`,401,'23503','Foreign key violation'))
+      if (error.code === "23503") {
+        return next(
+          new DataBaseErrors(
+            `user account no longer exists`,
+            401,
+            "23503",
+            "Foreign key violation",
+          ),
+        );
       }
       return next(new AppError(error.message, 500));
     } else if (error instanceof Error) {
@@ -138,10 +147,10 @@ export const deleteUserPost = async (
           `If user account deleted this post have`,
         ),
       );
-    await db.query(
-      `delete from posts where id=$1 and user_id=$2`,
-      [post_id, user_id],
-    );
+    await db.query(`delete from posts where id=$1 and user_id=$2`, [
+      post_id,
+      user_id,
+    ]);
     res.status(200).json({
       success: false,
       message: `post deleted successfully!`,
@@ -162,124 +171,166 @@ export const deleteUserPost = async (
   }
 };
 
-
-export const savePost = async(req:Request<UserPostAndCommentIdInterface>,res:Response,next:NextFunction):Promise<void>=>{
-  try{
-    const userId = req.user?.id
-    if(!userId){
-      next(new ClientError(`Unauthorised request`,400,`Login before to continue!`))
-      return
+export const savePost = async (
+  req: Request<UserPostAndCommentIdInterface>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      next(
+        new ClientError(
+          `Unauthorised request`,
+          400,
+          `Login before to continue!`,
+        ),
+      );
+      return;
     }
     const postId = req.params.postId;
-    const removeBookMark = await db.query(`delete from saved_posts where user_id=$1 and post_id=$2`,[userId,postId]);
-    if(removeBookMark.rowCount){
+    const removeBookMark = await db.query(
+      `delete from saved_posts where user_id=$1 and post_id=$2`,
+      [userId, postId],
+    );
+    if (removeBookMark.rowCount) {
       res.status(200).json({
-        success:true,
-        message:`Bookmark removed for this Post`,
-        removed_at:new Date().toISOString()
-      })
-      return
+        success: true,
+        message: `Bookmark removed for this Post`,
+        removed_at: new Date().toISOString(),
+      });
+      return;
     }
-    const bookmarkPost = await db.query(`insert into saved_posts(user_id,post_id) values($1,$2)`,[userId,postId])
-    if(bookmarkPost.rowCount) res.status(200).json({
-      success:true,
-      message:`Post bookMarked`,
-      postId,
-      saved_at:new Date().toISOString()
-    })
-    return
-  }
-  catch(error){
-    if(CheckIfDatabaseError(error)){
-      console.error(`Database Error:${error.message}`)
-      if(error.code==='23505'){
+    const bookmarkPost = await db.query(
+      `insert into saved_posts(user_id,post_id) values($1,$2)`,
+      [userId, postId],
+    );
+    if (bookmarkPost.rowCount)
+      res.status(200).json({
+        success: true,
+        message: `Post bookMarked`,
+        postId,
+        saved_at: new Date().toISOString(),
+      });
+    return;
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      if (error.code === "23505") {
         res.status(200).json({
-          success:true,
-          message:`Post already saved!`
-        })
-        return
+          success: true,
+          message: `Post already saved!`,
+        });
+        return;
       }
-      next(new AppError(error.message,500))
-      return
+      next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard App Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
     }
-    else if(error instanceof Error){
-      console.error(`Standard App Error:${error.message}`)
-      next(new AppError(error.message,500))
-      return
-    }
-    next(error)
+    next(error);
   }
-}
+};
 
-export const getSavedPost = async(req:Request,res:Response,next:NextFunction):Promise<void>=>{
-  try{
-    const userId = req.user?.id
-    if(!userId){
-      next(new ClientError(`Unauthorised request`,400,`Login before to continue!`))
-      return
+export const getSavedPost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      next(
+        new ClientError(
+          `Unauthorised request`,
+          400,
+          `Login before to continue!`,
+        ),
+      );
+      return;
     }
-    const userSavedPosts = await db.query(`select p.content,p.created_at from posts as p join saved_posts as s on s.post_id=p.id where s.user_id=$1`,[userId])
-    if(!userSavedPosts.rowCount){
+    const userSavedPosts = await db.query(
+      `select p.content,p.created_at from posts as p join saved_posts as s on s.post_id=p.id where s.user_id=$1`,
+      [userId],
+    );
+    if (!userSavedPosts.rowCount) {
       res.status(200).json({
-        success:true,
-        message:`BookMark is empty,Saved Posts appears here`,
-        viewed_at:new Date().toISOString()
-      })
-      return
+        success: true,
+        message: `BookMark is empty,Saved Posts appears here`,
+        viewed_at: new Date().toISOString(),
+      });
+      return;
     }
     const bookmarkedPosts = userSavedPosts.rows;
     res.status(200).json({
-      success:true,
-      message:`Saved Posts Count:${bookmarkedPosts.length}`,
+      success: true,
+      message: `Saved Posts Count:${bookmarkedPosts.length}`,
       bookmarkedPosts,
-      viewed_at:new Date().toISOString()
-    })
-  }
-  catch(error){
-    if(CheckIfDatabaseError(error)){
-      console.error(`Database Error:${error.message}`)
-      next(new  AppError(error.message,500))
-      return
+      viewed_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard AppError:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
     }
-    else if(error instanceof Error){
-      console.error(`Standard AppError:${error.message}`)
-      next(new AppError(error.message,500))
-      return
-    }
-    next(error)
+    next(error);
   }
-}
+};
 
-export const removeBookMark = async(req:Request<UserPostAndCommentIdInterface>,res:Response,next:NextFunction):Promise<void>=>{
-  try{
+export const removeBookMark = async (
+  req: Request<UserPostAndCommentIdInterface>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
     const userId = req.user?.id;
-    if(!userId){
-      next(new ClientError(`Unauthorised request`,401,`Login before to continue!`))
-      return
+    if (!userId) {
+      next(
+        new ClientError(
+          `Unauthorised request`,
+          401,
+          `Login before to continue!`,
+        ),
+      );
+      return;
     }
-    const postId= req.params.postId;
-    const removeUserBookMark = await db.query(`delete from saved_posts where user_id=$1 and post_id=$2`,[userId,postId]);
-    if(!removeUserBookMark.rowCount){
-      next(new ClientError(`post not found`,400,`post doesnt exists in bookmarks`))
-      return
+    const postId = req.params.postId;
+    const removeUserBookMark = await db.query(
+      `delete from saved_posts where user_id=$1 and post_id=$2`,
+      [userId, postId],
+    );
+    if (!removeUserBookMark.rowCount) {
+      next(
+        new ClientError(
+          `post not found`,
+          400,
+          `post doesnt exists in bookmarks`,
+        ),
+      );
+      return;
     }
     res.status(200).json({
-      success:true,
-      message:`BookMarked removed for post:${postId}`,
-      removed_at:new Date().toISOString()
-    })
-  }
-  catch(error){
-    if(CheckIfDatabaseError(error)){
-      console.error(`Database Error:${error.message}`)
-      next(new  AppError(error.message,500))
-      return
+      success: true,
+      message: `BookMarked removed for post:${postId}`,
+      removed_at: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard AppError:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
     }
-    else if(error instanceof Error){
-      console.error(`Standard AppError:${error.message}`)
-      next(new AppError(error.message,500))
-      return
-    }
-    next(error)
+    next(error);
   }
-}
+};
