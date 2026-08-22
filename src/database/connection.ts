@@ -1,19 +1,18 @@
-import {Pool} from 'pg';
+import { Pool } from "pg";
 
-import { DB_HOST,DB_NAME,DB_USER,DB_PASSWORD,DB_PORT } from '../config.js';
+import { DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT } from "../config.js";
 
 const pool = new Pool({
-    host:DB_HOST||'127.0.0.1',
-    user:DB_USER,
-    password:DB_PASSWORD,
-    database:DB_NAME,
-    port:DB_PORT
-})
+  host: DB_HOST || "127.0.0.1",
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
+  port: DB_PORT,
+});
 
+pool.query("select now()", (err, res) => {
+  if (err) return console.error(`Database Connection Failed,${err.stack}`);
+  console.log(`Database Connected at ${res.rows[0].now}`);
+});
 
-pool.query('select now()',(err,res)=>{
-    if(err) return  console.error(`Database Connection Failed,${err.stack}`)
-        console.log(`Database Connected at ${res.rows[0].now}`)
-})
-
-export default pool
+export default pool;
