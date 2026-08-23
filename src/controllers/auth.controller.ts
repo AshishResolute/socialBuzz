@@ -6,6 +6,7 @@ import type {
   forgotPasswordInterface,
   passwordResetTokenInterface,
   userPasswordInterface,
+  User,
 } from "../interfaces/interfaces.ts";
 import { AppError, ClientError } from "../ErrorHandler/ErrorClass.js";
 import bcrypt from "bcrypt";
@@ -17,6 +18,7 @@ import {
   generatePasswordResetToken,
   hashPasswordResetToken,
 } from "../util/randomStringGen.js";
+import {query} from '../database/query.js'
 export const signUp = async (
   req: Request<{}, {}, SignUpInterface>,
   res: Response,
@@ -27,7 +29,7 @@ export const signUp = async (
 
     let hashedPassword = await bcrypt.hash(password, 10);
 
-    let result = await db.query(
+    let result = await query<User>(
       `insert into users(email,password,userName) values($1,$2,$3)`,
       [email, hashedPassword, userName],
     );
@@ -66,10 +68,10 @@ export const login = async (
 ): Promise<void> => {
   try {
     let { email, password } = req.body;
-    let findUser = await db.query(`select * from users where email=$1`, [
+    let findUser = await query<User>(`select * from users where email=$1`, [
       email,
     ]);
-    if (findUser.rowCount === 0) {
+    if (findUser.rowCount === 0||!findUser.rows[0]) {
       res.status(401).json({
         success: false,
         message: `The email or password provided is incorrect`,
@@ -97,7 +99,7 @@ export const login = async (
     );
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     const exipryTimeInSevenDays = 1 * 60 * 1000 * 60 * 24 * 7;
-    await db.query(
+    await query<User>(
       `insert into refresh_token(user_id,token_hash,expires_at) values($1,$2,$3)`,
       [
         findUser.rows[0].id,
