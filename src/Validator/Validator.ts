@@ -10,6 +10,7 @@ import type {
   forgotPasswordInterface,
   passwordResetTokenInterface,
   userPasswordInterface,
+  Pagination,
 } from "../interfaces/interfaces.ts";
 
 export const signUpSchema = joi.object<SignUpInterface>({
@@ -184,29 +185,42 @@ export const userHashedTokenValidation =
     }),
   });
 
-export const userResetPasswordInterface = joi.object<userPasswordInterface>().keys({
-  newPassword: joi
-    .string()
-    .trim()
-    .min(8)
-    .max(28)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
-    .required()
-    .messages({
-      "string.empty": "Password required cannot be empty",
-      "string.min": "Password must have atleast 8 characters",
-      "string.max": "Password cannot be more than 28 characters",
-      "string.pattern.base":
-        "Password must have atleast one lowercase,one UPPERCASE and a Special character",
-      "any.required": "Password cannot be empty",
-    }),
-  confirmPassword: joi
-    .string()
-    .required()
-    .valid(joi.ref("newPassword"))
-    .messages({
-      "any.only": "Passwords do not match",
-      "any.required": "Please confirm your password",
-      "string.empty": "Confirm password cannot be empty",
-    }),
+export const userResetPasswordInterface = joi
+  .object<userPasswordInterface>()
+  .keys({
+    newPassword: joi
+      .string()
+      .trim()
+      .min(8)
+      .max(28)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
+      .required()
+      .messages({
+        "string.empty": "Password required cannot be empty",
+        "string.min": "Password must have atleast 8 characters",
+        "string.max": "Password cannot be more than 28 characters",
+        "string.pattern.base":
+          "Password must have atleast one lowercase,one UPPERCASE and a Special character",
+        "any.required": "Password cannot be empty",
+      }),
+    confirmPassword: joi
+      .string()
+      .required()
+      .valid(joi.ref("newPassword"))
+      .messages({
+        "any.only": "Passwords do not match",
+        "any.required": "Please confirm your password",
+        "string.empty": "Confirm password cannot be empty",
+      }),
+  });
+
+export const paginationValidation = joi.object<Pagination>({
+  page: joi.number().positive().optional().messages({
+    "number.base": `Page must be a number`,
+    "number.positive": `Page must be an valid positive integer`,
+  }),
+  offset: joi.number().positive().optional().messages({
+    "number.base": `Page must be a number`,
+    "number.positive": `Page must be an valid positive integer`,
+  }),
 });
