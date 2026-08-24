@@ -48,6 +48,6 @@ export const GlobalErrorHandler = (
   }
   res.status(500).json({
     success: false,
-    message: `Internal Server Error`,
+    message: `Internal Server Error,Reason:${err.message}`,
   });
 };

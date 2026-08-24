@@ -1,6 +1,8 @@
 import express from "express";
 import verifyToken from "../Middlewares/verifyToken.js";
 import { userFeed } from "../controllers/feed.controller.js";
+import { validate } from "../Middlewares/joiValidator.js";
+import { paginationValidation } from "../Validator/Validator.js";
 const router = express.Router();
 
 // get all the posts from those who i follow
@@ -60,5 +62,5 @@ const router = express.Router();
 //   }
 // });
 
-router.get('/',verifyToken,userFeed)
+router.get('/',verifyToken,validate({query:paginationValidation}),userFeed)
 export default router;

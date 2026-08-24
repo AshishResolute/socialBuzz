@@ -4,6 +4,10 @@ declare global {
   namespace Express {
     interface Request {
       user?:UserJWTPayload;
+      validatedQuery:{
+        page:number;
+        limit:number
+      }
     }
   }
 }

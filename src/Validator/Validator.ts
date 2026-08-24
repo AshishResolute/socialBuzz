@@ -219,7 +219,7 @@ export const paginationValidation = joi.object<Pagination>({
     "number.base": `Page must be a number`,
     "number.positive": `Page must be an valid positive integer`,
   }),
-  offset: joi.number().positive().optional().messages({
+  limit: joi.number().positive().optional().messages({
     "number.base": `Page must be a number`,
     "number.positive": `Page must be an valid positive integer`,
   }),

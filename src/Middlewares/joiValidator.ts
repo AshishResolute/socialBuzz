@@ -16,9 +16,11 @@ export const validate = (schema: validationInterface) => {
       req.body = value;
     }
     if (schema.query) {
+      console.log(req.query)
       const { error, value } = schema.query.validate(req.query);
       if (error) return next(new AppError(error.message, 400));
       req.query = value;
+      console.log(req.query)
     }
     if (schema.params) {
       const { error, value } = schema.params.validate(req.params);
