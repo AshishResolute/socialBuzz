@@ -22,49 +22,30 @@ export default router;
  * @openapi
  * /auth/signup:
  *   post:
+ *     tags: [Auth]
+ *     summary: Create a new account
  *     description: Here users can create their social accounts
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *               - confirmPassword
- *               - userName
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: abc@example.com
- *                 description: Users email address must be an valid email address
- *               password:
- *                 type: string
- *                 minLength: 8
- *                 maxLength: 28
- *                 description: must have one uppercase,lowercase and a special character with min length of 8
- *                 example: Dummypassword!
- *               confirmPassword:
- *                 type: string
- *                 minLength: 8
- *                 maxLength: 28
- *                 example: Dummypassword!
- *                 description: must have one uppercase,lowercase and a special character with min length of 8
- *               userName:
- *                 type: string
- *                 description: Must be the name for your account that will be visible to others
- *                 example: Ash Ketchum
+ *             $ref: '#/components/schemas/SignUp'
  *     responses:
- *      '200':
+ *       '201':
  *         description: User account created successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: string
+ *               type: object
  *               properties:
- *                 message: SignUp Successfull!
+ *                 message:
+ *                   type: string
+ *                   example: SignUp Successfull!
+ *       '400':
+ *         description: Validation error (invalid email, weak password, etc.)
+ *       '409':
+ *         description: Email or username already exists
  */
 
 /**
