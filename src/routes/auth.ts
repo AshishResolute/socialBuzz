@@ -52,31 +52,18 @@ export default router;
  * @openapi
  * /auth/login:
  *   post:
+ *     tags: [Auth]
+ *     summary: Login To Your Account
  *     description: Users can login to their account returns an JWT token
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required: true
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: abc@example.com
- *                 description: user email to login
- *               password:
- *                 type: string
- *                 minLength: 8
- *                 maxLength: 28
- *                 example: DummyPassword!
- *                 description: password must contain atleast one uppercase,lowercase and a special character
+ *             $ref: '#/components/schemas/Login'
  *     responses:
  *       200:
- *         description: successfull login will display a username and return a token
+ *         description: successfull login will display a username and return a token along with refresh token as an cookie
  *         content:
  *           application/json:
  *             schema:
@@ -92,8 +79,6 @@ export default router;
  *                   type: string
  *                   description: contains the jwt token
  *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwidXNlck5hbWUiOiJTZXJlbmEiLCJpYXQiOjE3NzUwMDE5MDksImV4cCI6MTc3NTAwMjgwOX0.DityXvZeZ4k85qCUHsS7sAbRRpWPK4hWhe-rX08DqUo
- *
- *
- *
- *
+ *       '401':
+ *         'description': Invalid email or password provided
  */
