@@ -1,12 +1,12 @@
 import joiToSwagger from 'joi-to-swagger';
-import { loginSchema, signUpSchema } from '../Validator/Validator.js';
+import { loginSchema, signUpSchema,checkUserContent } from '../Validator/Validator.js';
 
 
-const { swagger: SignUp } = (joiToSwagger).default(signUpSchema); 
-const {swagger:Login} = joiToSwagger.default(loginSchema)
-
+const { swagger: _SignUp } = (joiToSwagger).default(signUpSchema); 
+const {swagger:_Login} = joiToSwagger.default(loginSchema)
+const {swagger:_PostContent} = joiToSwagger.default(checkUserContent)
 export const generatedSchemas={
-    SignUp:{
+    _SignUp:{
         ...signUpSchema,
         example:{
             email:"dummy@user.com",
@@ -15,11 +15,17 @@ export const generatedSchemas={
             userName:"Dummy"
         }
     },
-    Login:{
+    _Login:{
         ...loginSchema,
         example:{
             email:"dummy@user.com",
             password:"@Dummy_password"
+        }
+    },
+    _PostContent:{
+        ...checkUserContent,
+        example:{
+            content:`This is my First post!`
         }
     }
 }
