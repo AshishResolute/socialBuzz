@@ -25,7 +25,7 @@ export const generatedSchemas={
     _PostContent:{
         ...checkUserContent,
         example:{
-            content:`This is my First post!`
+            content:`This is my First post and it feels great to post here!`
         }
     }
 }

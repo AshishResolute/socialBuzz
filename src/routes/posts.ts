@@ -55,10 +55,13 @@ router.post(
 router.get("/savedPost", verifyToken, getSavedPost);
 
 router.delete('/:postId/savedPost',verifyToken,validate({params:checkUserPostId}),removeBookMark)
+
 /**
  * @openapi
  * /post/content:
  *   post:
+ *     tags: [Post]
+ *     summary: Create new Posts.
  *     description: Here users can make posts just text for now and get a mail on their mail account
  *     security:
  *       - bearerAuth: []
@@ -67,16 +70,9 @@ router.delete('/:postId/savedPost',verifyToken,validate({params:checkUserPostId}
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - content
- *             properties:
- *               content:
- *                 type: string
- *                 description: users post must be in text
- *                 example: This is my first post!
+ *             $ref: '#components/schemas/_PostContent'
  *     responses:
- *       200:
+ *       201:
  *         description: successfully makes the post and will be visible to users who follow you!
  *         content:
  *           application/json:
@@ -89,7 +85,8 @@ router.delete('/:postId/savedPost',verifyToken,validate({params:checkUserPostId}
  *                 postedAt:
  *                   type: string
  *                   example: 2026-04-02T10:55:00.000Z
- *
+ *       '401':
+ *         description: provided post content is not a string or has less than 30 characters
  */
 
 /**

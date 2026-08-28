@@ -5,7 +5,7 @@ import { validate } from "../Middlewares/joiValidator.js";
 import { loginSchema, signUpSchema } from "../Validator/Validator.js";
 const router = express.Router();
 
-// for signUp i need email,password,confirmPassword,userName => validate every inputs and store hashed Passwords
+
 
 router.post("/signup",authLimitter, validate({body:signUpSchema}), signUp)
 
@@ -30,7 +30,7 @@ export default router;
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/SignUp'
+ *             $ref: '#/components/schemas/_SignUp'
  *     responses:
  *       '201':
  *         description: User account created successfully
@@ -60,9 +60,9 @@ export default router;
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Login'
+ *             $ref: '#/components/schemas/_Login'
  *     responses:
- *       200:
+ *       '200':
  *         description: successfull login will display a username and return a token along with refresh token as an cookie
  *         content:
  *           application/json:
