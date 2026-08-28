@@ -79,4 +79,9 @@ alter table users
     add column if not exists reset_password_token text default null;
 
 alter table users
-    add column if not exists reset_token_expiry TIMESTAMPTZ default null
+    add column if not exists reset_token_expiry TIMESTAMPTZ default null;
+
+
+alter table posts
+    add column content_tsv tsvector
+    generated always as (to_tsvector('english',content)) stored;
