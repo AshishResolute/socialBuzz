@@ -11,6 +11,7 @@ import type {
   passwordResetTokenInterface,
   userPasswordInterface,
   Pagination,
+  UserSearchQuery,
 } from "../interfaces/interfaces.ts";
 
 export const signUpSchema = joi.object<SignUpInterface>({
@@ -224,3 +225,13 @@ export const paginationValidation = joi.object<Pagination>({
     "number.positive": `Page must be an valid positive integer`,
   }),
 });
+
+
+export const validateUserSearchQuery = joi.object<UserSearchQuery>({
+  userQuery:joi.string().trim().replace(/\s+/g, ' ').min(3).max(100).required().messages({
+    'any.required':`userQuery is required!`,
+    'string.empty':`userQuery cannot be empty`,
+    'string.min':`provide atleast a keyword to search rather than a single character`,
+    'string.max':`userQuery cannot be more than 100 characters,try keeping it short for better results`
+  })
+})

@@ -101,3 +101,7 @@ export interface Pagination{
   page?:number;
   limit?:number;
 }
+
+export interface UserSearchQuery{
+  userQuery:string
+}
