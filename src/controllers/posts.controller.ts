@@ -11,11 +11,13 @@ import type {
   AuthenticatedRequest,
   checkUserContentInterface,
   checkUserPostIdInterface,
+  Posts,
   User,
   UserPostAndCommentIdInterface,
+  UserSearchQuery,
 } from "../interfaces/interfaces.js";
 import type { QueryResult } from "pg";
-
+import { query } from "../database/query.js";
 export const createUserPost = async (
   req: Request<{}, {}, checkUserContentInterface, {}>,
   res: Response,
@@ -328,6 +330,54 @@ export const removeBookMark = async (
       return;
     } else if (error instanceof Error) {
       console.error(`Standard AppError:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    }
+    next(error);
+  }
+};
+
+export const findPostBySearch = async (
+  req: Request<{}, {}, {}, UserSearchQuery>,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const search = req.validatedQuery?.userQuery;
+    if (!search) {
+      next(
+        new ClientError(
+          `No search keyword provided`,
+          400,
+          `Enter a keyword to search`,
+        ),
+      );
+    }
+    const matchedPosts = await query<Posts>(
+      `select id,content from posts where content_tsv @@ plainto_tsquery('english',$1)`,
+      [search],
+    );
+    if (matchedPosts.rowCount === 0) {
+      res.status(200).json({
+        success: true,
+        message: `No posts found,try using clear words to filter/search`,
+        timeStamp: new Date().toISOString(),
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      message: `${matchedPosts.rows.length} posts found`,
+      matchedPosts: matchedPosts.rows,
+      timeStamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (CheckIfDatabaseError(error)) {
+      console.error(`Database Error:${error.message}`);
+      next(new AppError(error.message, 500));
+      return;
+    } else if (error instanceof Error) {
+      console.error(`Standard App Error:${error.message}`);
       next(new AppError(error.message, 500));
       return;
     }

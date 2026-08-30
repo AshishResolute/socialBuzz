@@ -226,12 +226,18 @@ export const paginationValidation = joi.object<Pagination>({
   }),
 });
 
-
 export const validateUserSearchQuery = joi.object<UserSearchQuery>({
-  userQuery:joi.string().trim().replace(/\s+/g, ' ').min(3).max(100).required().messages({
-    'any.required':`userQuery is required!`,
-    'string.empty':`userQuery cannot be empty`,
-    'string.min':`provide atleast a keyword to search rather than a single character`,
-    'string.max':`userQuery cannot be more than 100 characters,try keeping it short for better results`
-  })
-})
+  userQuery: joi
+    .string()
+    .trim()
+    .replace(/\s+/g, " ")
+    .min(3)
+    .max(100)
+    .required()
+    .messages({
+      "any.required": `userQuery is required!`,
+      "string.empty": `userQuery cannot be empty`,
+      "string.min": `provide atleast a keyword to search rather than a single character`,
+      "string.max": `userQuery cannot be more than 100 characters,try keeping it short for better results`,
+    }),
+});

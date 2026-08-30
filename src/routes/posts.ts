@@ -13,9 +13,14 @@ import {
   updateUserPostContent,
   getSavedPost,
   removeBookMark,
+  findPostBySearch,
 } from "../controllers/posts.controller.js";
 import { validate } from "../Middlewares/joiValidator.js";
-import { checkUserContent, checkUserPostId } from "../Validator/Validator.js";
+import {
+  checkUserContent,
+  checkUserPostId,
+  validateUserSearchQuery,
+} from "../Validator/Validator.js";
 const currentFile = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(currentFile);
 dotenv.config({ path: path.join(__dirname, "../../dev.env") });
@@ -54,7 +59,19 @@ router.post(
 
 router.get("/savedPost", verifyToken, getSavedPost);
 
-router.delete('/:postId/savedPost',verifyToken,validate({params:checkUserPostId}),removeBookMark)
+router.delete(
+  "/:postId/savedPost",
+  verifyToken,
+  validate({ params: checkUserPostId }),
+  removeBookMark,
+);
+
+router.get(
+  "/search",
+  verifyToken,
+  validate({ query: validateUserSearchQuery }),
+  findPostBySearch,
+);
 
 /**
  * @openapi

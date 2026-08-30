@@ -12,7 +12,6 @@ export const userFeed = async (
   try {
     const userId = req.user?.id;
     let { page, limit } = req.query;
-    console.log(req.query)
     if (!page) {
       page = req.query.page || 1;
     }

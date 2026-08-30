@@ -19,7 +19,7 @@ export const validate = (schema: validationInterface) => {
       const { error, value } = schema.query.validate(req.query);
       if (error) return next(new AppError(error.message, 400));
       // req.query = value;// this throws an error as now req.query is just an getter and cannot be modified
-      req.validatedQuery=value
+      req.validatedQuery = value;
     }
     if (schema.params) {
       const { error, value } = schema.params.validate(req.params);

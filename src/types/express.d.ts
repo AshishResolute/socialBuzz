@@ -5,8 +5,9 @@ declare global {
     interface Request {
       user?:UserJWTPayload;
       validatedQuery?:{
-        page:number;
-        limit:number
+        page?:number;
+        limit?:number;
+        userQuery?:string;
       }
     }
   }

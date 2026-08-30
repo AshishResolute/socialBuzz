@@ -41,67 +41,75 @@ export interface AuthenticatedRequest<
   user: UserJWTPayload;
 }
 
-
-export interface checkUserPostIdInterface{
-  postId?:string
+export interface checkUserPostIdInterface {
+  postId?: string;
 }
 
-export interface validateUserCommentInterface{
-  userComment:string
+export interface validateUserCommentInterface {
+  userComment: string;
 }
 
-export interface UserPostAndCommentIdInterface{
-  postId?:string;
-  commentId?:string;
+export interface UserPostAndCommentIdInterface {
+  postId?: string;
+  commentId?: string;
 }
 
-export interface UserIdInterface{
-  userId?:string
+export interface UserIdInterface {
+  userId?: string;
 }
 
-export interface UserProfileUpdate{
-  display_name?:string,
-  location?:string,
-  socials?:string[],
-  bio?:string,
+export interface UserProfileUpdate {
+  display_name?: string;
+  location?: string;
+  socials?: string[];
+  bio?: string;
 }
 
-export type inputFieldsValuesTypes = string|string[]|number
+export type inputFieldsValuesTypes = string | string[] | number;
 
-export interface forgotPasswordInterface{
-  email:string
+export interface forgotPasswordInterface {
+  email: string;
 }
 
-export interface passwordResetTokenInterface{
-  resetPasswordToken:string
+export interface passwordResetTokenInterface {
+  resetPasswordToken: string;
 }
 
-export interface userPasswordInterface{
-  newPassword:string
-  confirmPassword:string
+export interface userPasswordInterface {
+  newPassword: string;
+  confirmPassword: string;
 }
 
-export interface User{
-  id:number;
-  email:string;
-  password:string;
-  username:string;
-  display_name:string;
-  bio:string|null;
-  socials:string[];
-  location:string|null;
-  profile_picture:string|null;
-  reset_password_token:string|null;
-  reset_token_expiry:Date|null;
-  created_at:Date;
-  updated_at:Date;
+export interface User {
+  id: number;
+  email: string;
+  password: string;
+  username: string;
+  display_name: string;
+  bio: string | null;
+  socials: string[];
+  location: string | null;
+  profile_picture: string | null;
+  reset_password_token: string | null;
+  reset_token_expiry: Date | null;
+  created_at: Date;
+  updated_at: Date;
 }
 
-export interface Pagination{
-  page?:number;
-  limit?:number;
+export interface Posts {
+  id: number;
+  content: string;
+  user_id: number;
+  created_at: Date;
+  updated_at: Date;
+  content_tsv: string;
 }
 
-export interface UserSearchQuery{
-  userQuery:string
+export interface Pagination {
+  page?: number;
+  limit?: number;
+}
+
+export interface UserSearchQuery {
+  userQuery?: string;
 }
