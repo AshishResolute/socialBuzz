@@ -130,6 +130,7 @@ npm start
 - [x] Migrated to TypeScript
 - [x] File uploads (Multer + Cloudinary)
 - [ ] API documentation (Swagger)
+- [x] Full text search(postgres)
 
 ---
 
