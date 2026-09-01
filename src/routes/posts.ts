@@ -110,6 +110,8 @@ router.get(
  * @openapi
  * /post/editPost/{postId}:
  *   put:
+ *     tags: [Post]
+ *     summary: Edit Your post
  *     description: users can update their post
  *     security:
  *       - bearerAuth: []
