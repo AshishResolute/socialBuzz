@@ -105,6 +105,49 @@ export interface Posts {
   content_tsv: string;
 }
 
+export interface Likes {
+  id: number;
+  post_id: number;
+  user_id: number;
+  liked_at: Date;
+}
+
+export interface Comments {
+  id: number;
+  post_id: number;
+  user_id: number;
+  content: string;
+  commented_on: Date;
+  updated_at: Date;
+}
+
+export interface follow {
+  follower_id: number;
+  following_id: number;
+}
+
+export interface Refresh_Token {
+  id: number;
+  user_id: number;
+  token_hash: string;
+  parent_id: number;
+  is_used: boolean;
+  expires_at: Date;
+}
+
+export interface Comment_Likes {
+  id: number;
+  comment_id: number;
+  user_id: number;
+  liked_at: number;
+}
+export interface Saved_Posts {
+  id: number;
+  post_id: number;
+  user_id: number;
+  saved_at: number;
+}
+
 export interface Pagination {
   page?: number;
   limit?: number;
