@@ -5,7 +5,6 @@ import {
   AppError,
   CheckIfDatabaseError,
   ClientError,
-  DataBaseErrors,
 } from "../ErrorHandler/ErrorClass.js";
 import type {
   AuthenticatedRequest,
@@ -18,6 +17,7 @@ import type {
 } from "../interfaces/interfaces.js";
 import type { QueryResult } from "pg";
 import { query } from "../database/query.js";
+
 export const createUserPost = async (
   req: Request<{}, {}, checkUserContentInterface, {}>,
   res: Response,
@@ -57,25 +57,9 @@ export const createUserPost = async (
       postedAt: userData.created_at,
     });
   } catch (error) {
-    if (CheckIfDatabaseError(error)) {
-      console.error(`Database error ,${(error.message, error.detail)}`);
-      if (error.code === "23503") {
-        return next(
-          new DataBaseErrors(
-            `user account no longer exists`,
-            401,
-            "23503",
-            "Foreign key violation",
-          ),
-        );
-      }
-      return next(new AppError(error.message, 500));
-    } else if (error instanceof Error) {
-      console.error(`Standard App error: ${error.message}`);
-      next(new AppError(error.message, 500));
+    next(error)
     }
   }
-};
 
 export const updateUserPostContent = async (
   req: AuthenticatedRequest<
