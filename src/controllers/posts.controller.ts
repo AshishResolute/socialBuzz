@@ -17,26 +17,16 @@ import type {
 } from "../interfaces/interfaces.js";
 import type { QueryResult } from "pg";
 import { query } from "../database/query.js";
+import { catchAsync } from "../util/catchAsync.js";
 
-export const createUserPost = async (
-  req: Request<{}, {}, checkUserContentInterface, {}>,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
+export const createUserPost = catchAsync(
+  async (
+    req: Request<{}, {}, checkUserContentInterface, {}>,
+    res: Response,
+    next: NextFunction,
+  ) => {
     const user_id = req.user?.id;
     let { content } = req.body;
-    // const findUser = await db.query(`select username from users where id=$1`, [
-    //   user_id,
-    // ]);
-    // if (findUser.rowCount === 0)
-    //   return next(
-    //     new ClientError(
-    //       `User not found`,
-    //       404,
-    //       `User account not found or deleted!`,
-    //     ),
-    //   );
 
     // removing the first unnecessary db search ,will rely on foreign key constraint if user doesnt exists it just throws a error no need to check if user exists
     const postAContent: QueryResult<User> = await db.query(
@@ -56,10 +46,8 @@ export const createUserPost = async (
       postId: userData.id,
       postedAt: userData.created_at,
     });
-  } catch (error) {
-    next(error)
-    }
-  }
+  },
+);
 
 export const updateUserPostContent = async (
   req: AuthenticatedRequest<
@@ -74,23 +62,23 @@ export const updateUserPostContent = async (
   try {
     let user_id = req.user.id;
     let post_id = req.params.postId;
-    let findUser = await db.query(
-      `select u.username as username,p.id as post_id from users as u join posts as p on u.id = p.user_id where p.user_id=$1 and p.id=$2`,
-      [user_id, post_id],
-    );
-    if (findUser.rowCount === 0)
-      return next(new ClientError(`User not Found!`, 404, `No post found!`));
+    // let findUser = await db.query(
+    //   `select u.username as username,p.id as post_id from users as u join posts as p on u.id = p.user_id where p.user_id=$1 and p.id=$2`,
+    //   [user_id, post_id],
+    // );
+    // if (findUser.rowCount === 0)
+    //   return next(new ClientError(`User not Found!`, 404, `No post found!`));
     let { content } = req.body;
     let updatePostContent = await db.query(
       `update posts set content=$1,updated_at=$2 where id=$3 and user_id=$4 returning updated_at`,
       [content, new Date().toISOString(), post_id, user_id],
     );
-    // await postQueue.add("postQueue", {
-    //   to: process.env.RESEND_USER_ACCOUNT_NAME,
-    //   message: `Post successfully updated!`,
-    // });
+    await postQueue.add("postQueue", {
+      to: process.env.RESEND_USER_ACCOUNT_NAME,
+      message: `Post successfully updated!`,
+    });
     res.status(200).json({
-      message: `post updated successfuly for ${findUser.rows[0].username}`,
+      message: `post updated successfuly `,
       updated_at: updatePostContent.rows[0].updated_at,
     });
   } catch (error) {

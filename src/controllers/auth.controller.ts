@@ -19,12 +19,13 @@ import {
   hashPasswordResetToken,
 } from "../util/randomStringGen.js";
 import {query} from '../database/query.js'
-export const signUp = async (
+import { catchAsync } from "../util/catchAsync.js";
+
+export const signUp = catchAsync(async (
   req: Request<{}, {}, SignUpInterface>,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  try {
     let { email, password, userName } = req.body;
 
     let hashedPassword = await bcrypt.hash(password, 10);
@@ -36,30 +37,7 @@ export const signUp = async (
     if (result.rowCount === 0)
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
     res.status(201).json({ message: `SignUp Successfull!` });
-  } catch (err) {
-    // if (err.code === "23505") {
-    //   res
-    //     .status(400)
-    //     .json({ message: `Account already exists,Try with logging in!` });
-    //   return;
-    // }
-    if (CheckIfDatabaseError(err)) {
-      if (err.code === "23505") {
-        res
-          .status(400)
-          .json({ success: false, message: `Account already exists!` });
-        return;
-      }
-    }
-    if (err instanceof Error) {
-      console.error(`Standard Application Error`);
-      res.status(500).json({ message: `Internal Server error` });
-      return;
-    }
-    console.error(`Unknown Error:${err}`);
-    next(err);
-  }
-};
+  })
 
 export const login = async (
   req: Request<{}, {}, LoginInterface>,
