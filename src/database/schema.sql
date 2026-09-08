@@ -85,3 +85,7 @@ alter table users
 alter table posts
     add column content_tsv tsvector
     generated always as (to_tsvector('english',content)) stored;
+
+alter table posts
+    add column summary text
+    add column summary_generated_at timestamp;

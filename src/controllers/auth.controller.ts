@@ -13,19 +13,20 @@ import bcrypt from "bcrypt";
 import db from "../database/connection.js";
 import jwt from "jsonwebtoken";
 import { JWT_ACCESS_KEY, JWT_REFRESH_KEY } from "../config.js";
-import { CheckIfDatabaseError } from "../ErrorHandler/ErrorClass.js";
+
 import {
   generatePasswordResetToken,
   hashPasswordResetToken,
 } from "../util/randomStringGen.js";
-import {query} from '../database/query.js'
+import { query } from "../database/query.js";
 import { catchAsync } from "../util/catchAsync.js";
 
-export const signUp = catchAsync(async (
-  req: Request<{}, {}, SignUpInterface>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
+export const signUp = catchAsync(
+  async (
+    req: Request<{}, {}, SignUpInterface>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     let { email, password, userName } = req.body;
 
     let hashedPassword = await bcrypt.hash(password, 10);
@@ -37,7 +38,8 @@ export const signUp = catchAsync(async (
     if (result.rowCount === 0)
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
     res.status(201).json({ message: `SignUp Successfull!` });
-  })
+  },
+);
 
 export const login = async (
   req: Request<{}, {}, LoginInterface>,
@@ -49,7 +51,7 @@ export const login = async (
     let findUser = await query<User>(`select * from users where email=$1`, [
       email,
     ]);
-    if (findUser.rowCount === 0||!findUser.rows[0]) {
+    if (findUser.rowCount === 0 || !findUser.rows[0]) {
       res.status(401).json({
         success: false,
         message: `The email or password provided is incorrect`,
@@ -281,7 +283,7 @@ export const resetPassword = async (
         message: `Password updated successfully,login with the new password`,
         updated_at: new Date().toISOString(),
       });
-      // handles race-condition when update returns 0 rows because of any other prev req that already updates the password then the token is invalid
+    // handles race-condition when update returns 0 rows because of any other prev req that already updates the password then the token is invalid
     else next(new AppError(`Failed to update password`, 500));
   } catch (error) {
     if (error instanceof Error) {
