@@ -4,6 +4,7 @@ import redisConnection from "../database/redis.js";
 
 
 
+
 const generalLimitter = rateLimit({
   windowMs: 1 * 60 * 1000,
   limit: 15,
@@ -40,4 +41,15 @@ const userPostLimitter = rateLimit({
   legacyHeaders: false,
 });
 
-export { generalLimitter, authLimitter, userPostLimitter };
+const aiLimitter = rateLimit({
+  windowMs:1*60*1000*60,
+  limit:5,
+  message:{error:`Rate limit reached for post summarization on requests per min (RPM): Limit 5, Used 5, Requested 1. Please try again after an hour.`},
+  store:new RedisStore({
+    sendCommand:(...args)=>redisConnection.call(...args),
+    prefix:`Ai-PostSummarization-Limit:`
+  }),
+  standardHeaders:true,
+  legacyHeaders:false
+})
+export { generalLimitter, authLimitter, userPostLimitter,aiLimitter };
