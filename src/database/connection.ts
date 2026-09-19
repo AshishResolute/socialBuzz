@@ -8,6 +8,9 @@ const pool = new Pool({
   password: DB_PASSWORD,
   database: DB_NAME,
   port: DB_PORT,
+  ssl: DB_HOST === "127.0.0.1" || DB_HOST === "localhost"
+    ? false
+    : { rejectUnauthorized: false }
 });
 
 pool.query("select now()", (err, res) => {
