@@ -32,3 +32,5 @@ export const CLOUD_API_KEY =  process.env.CLOUD_API_KEY;
 export const CLOUD_API_SECRET =  process.env.CLOUD_API_SECRET;
 
 export const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+export const REDIS_URL = process.env.REDIS_URL
