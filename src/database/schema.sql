@@ -87,5 +87,5 @@ alter table posts
     generated always as (to_tsvector('english',content)) stored;
 
 alter table posts
-    add column summary text
+    add column summary text,
     add column summary_generated_at timestamp;
