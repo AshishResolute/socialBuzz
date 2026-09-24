@@ -18,11 +18,11 @@ export const userFeed = async (
     if (!limit) {
       limit = req.query.limit || 1;
     }
-    console.log(page,limit)
+    console.log(page, limit);
     // implementing offset based pagination
     const offset = (page - 1) * limit;
     const userFeed = await db.query(
-      `select p.content from posts as p join follow as f on p.user_id=f.following_id where f.follower_id=$1 limit $2 offset $3`,
+      `select p.content,u.username,p.created_at from posts as p join follow as f on p.user_id=f.following_id join users as u on u.id=p.user_id where f.follower_id=$1 order by p.created_at desc limit $2 offset $3`,
       [userId, limit, offset],
     );
     if (!userFeed.rowCount) {
@@ -31,6 +31,7 @@ export const userFeed = async (
         message: `Nothing To show here,Try following someone!`,
         fetched_at: new Date().toISOString(),
       });
+      return;
     }
     const userFeedPosts = userFeed.rows.map((post) => post);
     res.status(200).json({
