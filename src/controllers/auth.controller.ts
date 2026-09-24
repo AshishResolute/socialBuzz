@@ -90,7 +90,8 @@ export const login = async (
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 1 * 60 * 1000 * 60 * 24 * 7,
-      sameSite: "strict",
+      sameSite: 'none',
+      secure:true
     });
     res.status(200).json({
       message: `Login Success!`,
@@ -132,7 +133,8 @@ export const refresh = async (
       ]);
       res.clearCookie("refreshToken", {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "none",
+        secure:true
       });
       return next(new AppError(`Token Theft detected`, 400));
     }
@@ -157,8 +159,9 @@ export const refresh = async (
     );
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 1 * 60 * 1000 * 60 * 24 * 7,
+      secure:true
     });
     res.json({ newAccessToken });
   } catch (error) {
