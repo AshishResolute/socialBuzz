@@ -19,6 +19,7 @@ const app = express();
 const allowedOrigins = ['https://social-buzz-frontend-sand.vercel.app/']
 
 if(process.env.NODE_ENV!=='production'){
+  console.log(`Running on dev mode`) // accept req from localhost(frontend)
   allowedOrigins.push('http://localhost:5173')
 }
 
