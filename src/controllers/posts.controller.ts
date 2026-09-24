@@ -19,6 +19,7 @@ import type { QueryResult } from "pg";
 import { query } from "../database/query.js";
 import { catchAsync } from "../util/catchAsync.js";
 
+
 export const createUserPost = catchAsync(
   async (
     req: Request<{}, {}, checkUserContentInterface, {}>,
@@ -356,3 +357,5 @@ export const findPostBySearch = async (
     next(error);
   }
 };
+
+
