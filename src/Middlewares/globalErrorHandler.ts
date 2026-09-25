@@ -25,19 +25,17 @@ export const GlobalErrorHandler = (
     };
     res.status(err.statusCode).json(ErrorDetails);
     return;
-  }
-  //  else if (err instanceof ClientError) {
-  //   const ErrorDetails: ErrorMessage & { name: string; details: string } = {
-  //     success: false,
-  //     name: err.name,
-  //     statusCode: err.statusCode,
-  //     message: err.message,
-  //     details: err.details,
-  //   };
-  //   res.status(err.statusCode).json(ErrorDetails);
-  //   return;
-  // } 
-  else if (err instanceof DataBaseErrors) {
+  } else if (err instanceof ClientError) {
+    const ErrorDetails: ErrorMessage & { name: string; details: string } = {
+      success: false,
+      name: err.name,
+      statusCode: err.statusCode,
+      message: err.message,
+      details: err.details,
+    };
+    res.status(err.statusCode).json(ErrorDetails);
+    return;
+  } else if (err instanceof DataBaseErrors) {
     const ErrorDetails: ErrorMessage & { code: string; detail?: string } = {
       success: false,
       message: err.message,

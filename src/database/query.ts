@@ -15,13 +15,13 @@ export const query = async <T extends QueryResultRow>(
   } catch (error) {
     if (CheckIfDatabaseError(error)) {
       if (error.code === "23505") {
-        if(error.constraint?.includes('username')){
-          throw new ClientError(`username already taken`,409,`Duplicate username`)
-        } 
+        // if(error.constraint?.includes('username')){
+        //   throw new ClientError(`username already taken`,409,`Duplicate username`)
+        // } 
 
-        if(error.constraint?.includes('email')){
-          throw new ClientError(`email already registered`,409,`Duplicate email`)
-        }
+        // if(error.constraint?.includes('email')){
+        //   throw new ClientError(`email already registered`,409,`Duplicate email`)
+        // }
 
         throw new ClientError(
           `Duplicate entry`,
