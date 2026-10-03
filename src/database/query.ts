@@ -22,7 +22,7 @@ export const query = async <T extends QueryResultRow>(
         // if(error.constraint?.includes('email')){
         //   throw new ClientError(`email already registered`,409,`Duplicate email`)
         // }
-
+        
         throw new ClientError(
           `Duplicate entry`,
           409,

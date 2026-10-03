@@ -11,3 +11,5 @@ coverage/
 helperFunctions/
 
 tsLearning.txt
+
+.vitest/
