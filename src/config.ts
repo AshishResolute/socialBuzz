@@ -5,8 +5,12 @@ import { fileURLToPath } from 'node:url';
 const filePath = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(filePath)
 
+if(process.env.NODE_ENV==='development')
 dotenv.config({path:path.join(__dirname,'../dev.env')})
+else dotenv.config({path:path.join(__dirname,'../test.env')})
 
+
+console.log(`Database connected to ${process.env.DB_NAME}`)
 export const SERVER_PORT = process.env.SERVER_PORT
 
 export const DB_HOST = process.env.DB_HOST

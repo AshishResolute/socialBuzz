@@ -1,6 +1,6 @@
 
-import app from '../src/routes/app.ts';
-import { SERVER_PORT } from '../src/config.ts';
+import app from '../src/routes/app.js';
+import { SERVER_PORT } from '../src/config.js';
 
 const PORT = SERVER_PORT||3000
 

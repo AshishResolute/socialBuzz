@@ -37,7 +37,7 @@ export const signUp = catchAsync(
     );
     if (result.rowCount === 0)
       return next(new AppError(`Signup Failed!,Try Again Later`, 500));
-    res.status(201).json({ message: `SignUp Successfull!` });
+    res.status(201).json({ success: true, message: `SignUp Successfull!` });
   },
 );
 
@@ -90,8 +90,8 @@ export const login = async (
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       maxAge: 1 * 60 * 1000 * 60 * 24 * 7,
-      sameSite: 'none',
-      secure:true
+      sameSite: "none",
+      secure: true,
     });
     res.status(200).json({
       message: `Login Success!`,
@@ -134,7 +134,7 @@ export const refresh = async (
       res.clearCookie("refreshToken", {
         httpOnly: true,
         sameSite: "none",
-        secure:true
+        secure: true,
       });
       return next(new AppError(`Token Theft detected`, 400));
     }
@@ -161,7 +161,7 @@ export const refresh = async (
       httpOnly: true,
       sameSite: "none",
       maxAge: 1 * 60 * 1000 * 60 * 24 * 7,
-      secure:true
+      secure: true,
     });
     res.json({ newAccessToken });
   } catch (error) {
