@@ -23,7 +23,7 @@ const generalLimiter = rateLimit({
 
 const authLimitter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 5,
+  limit: 1000,
   message: { error: `Too many login attempts,Wait and try again later!` },
   store: new RedisStore({
     sendCommand,

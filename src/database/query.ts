@@ -26,7 +26,7 @@ export const query = async <T extends QueryResultRow>(
         throw new ClientError(
           `Duplicate entry`,
           409,
-          error.message,
+          `username or email invalid`,
         );
       }
       throw new DataBaseErrors(error.message, 500, error.code);
