@@ -1,10 +1,10 @@
 import app from "../routes/app.js";
-import { expect, describe, test, beforeEach } from "vitest";
+import { expect, describe, test, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import pool from "../database/connection.js";
 
 const testMail = `test@email.com`;
-const anotherTestMail = `anotherTest@email.com`
+const anotherTestMail = `anotherTest@email.com`;
 test("Should check the health route", async () => {
   const response = await request(app).get("/health");
   expect(response.status).toBe(200);
@@ -14,7 +14,10 @@ test("Should check the health route", async () => {
 
 describe(`Should test signup`, () => {
   beforeEach(async () => {
-    await pool.query(`delete from users where email=$1 or email=$2`, [testMail,anotherTestMail]);
+    await pool.query(`delete from users where email=$1 or email=$2`, [
+      testMail,
+      anotherTestMail,
+    ]);
   });
   test(`should successfully create user account`, async () => {
     const input = {
@@ -24,9 +27,12 @@ describe(`Should test signup`, () => {
       userName: `testUser`,
     };
     const res = await request(app).post("/auth/signup").send(input);
-   const findUser = await pool.query(`select username from users where email=$1`,[testMail])
-   
-   expect(findUser.rowCount).toBeGreaterThan(0)
+    const findUser = await pool.query(
+      `select username from users where email=$1`,
+      [testMail],
+    );
+
+    expect(findUser.rowCount).toBeGreaterThan(0);
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty("message");
     expect(res.body.message).toContain("SignUp Successfull!");
@@ -111,5 +117,32 @@ describe(`Should test signup`, () => {
 
     expect(res.status).toBe(409);
     expect(res.body.message).toContain(`Duplicate entry`);
+  });
+});
+
+describe(`Testing login route`, () => {
+  beforeEach(async () => {
+    await request(app).post("/auth/signup").send({
+      email: testMail,
+      password: "Test@user",
+      confirmPassword: `Test@user`,
+      userName: `testUser`,
+    });
+  });
+
+  afterEach(async () => {
+    await pool.query(`delete from users where email=$1`, [testMail]);
+  });
+
+  test(`Should login user successfully`, async () => {
+    const res = await request(app).post(`/auth/login`).send({
+      email: testMail,
+      password: `Test@user`,
+    });
+
+    console.log(res.body)
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty(`token`);
+    expect(res.body.message).toContain(`Login Success!`);
   });
 });
