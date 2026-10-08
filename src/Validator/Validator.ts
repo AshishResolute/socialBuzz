@@ -51,7 +51,7 @@ export const signUpSchema = joi.object<SignUpInterface>({
 
 export const loginSchema = joi.object({
   email: joi.string().trim().email().required().messages({
-    "string.email": "Enter a valid email",
+    "string.email": "Invalid Email",
     "any.required": "Email is required!",
     "string.empty": "Email cannot be empty",
   }),

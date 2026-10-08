@@ -140,17 +140,65 @@ describe(`Testing login route`, () => {
       password: `Test@user`,
     });
 
-
-    let refreshToken:string|undefined
-    if(Array.isArray(res.header[`set-cookie`])){
-     refreshToken= res.header[`set-cookie`].find((cookie:string)=>cookie.includes(`refreshToken`))
+    let refreshToken: string | undefined;
+    if (Array.isArray(res.header[`set-cookie`])) {
+      refreshToken = res.header[`set-cookie`].find((cookie: string) =>
+        cookie.includes(`refreshToken`),
+      );
     }
-    
-    expect(refreshToken).toBeDefined()
-    expect(refreshToken).toContain('HttpOnly')
-    expect(refreshToken).toContain('SameSite')
+
+    expect(refreshToken).toBeDefined();
+    expect(refreshToken).toContain("HttpOnly");
+    expect(refreshToken).toContain("SameSite");
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty(`token`);
     expect(res.body.message).toContain(`Login Success!`);
   });
+
+  test(`should return 400 for invalid email`, async () => {
+    const res = await request(app).post("/auth/login").send({
+      email: `InvalidEmail`,
+      password: `Valid@password`,
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain(`Invalid Email`);
+  });
+  test(`should return 400 for invalid password`, async () => {
+    const res = await request(app).post("/auth/login").send({
+      email: testMail,
+      password: `Validpassword`,
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain(
+      `Password must contain at least one uppercase, one lowercase, and one special character`,
+    );
+  });
+
+  test(`Should return 401 if user account does not exist`, async () => {
+    await pool.query(`delete from users where email=$1`, [testMail]);
+    const res = await request(app).post(`/auth/login`).send({
+      email: testMail,
+      password: `Valid@password`,
+    });
+
+    expect(res.status).toBe(401);
+    expect(res.body.success).toBeFalsy();
+    expect(res.body.message).toContain(
+      `The email or password provided is incorrect`,
+    );
+  });
+
+  test(`Should return 400 for invalid Passwords`,async()=>{
+    const res = await request(app)
+    .post(`/auth/login`)
+    .send({
+      email:testMail,
+      password:`Invalid@password`
+    })
+
+    expect(res.status).toBe(400)
+    expect(res.body.message).toContain(`The email or password provided is incorrect`)
+  })
 });
