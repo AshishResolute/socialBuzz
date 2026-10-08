@@ -140,7 +140,15 @@ describe(`Testing login route`, () => {
       password: `Test@user`,
     });
 
-    console.log(res.body)
+
+    let refreshToken:string|undefined
+    if(Array.isArray(res.header[`set-cookie`])){
+     refreshToken= res.header[`set-cookie`].find((cookie:string)=>cookie.includes(`refreshToken`))
+    }
+    
+    expect(refreshToken).toBeDefined()
+    expect(refreshToken).toContain('HttpOnly')
+    expect(refreshToken).toContain('SameSite')
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty(`token`);
     expect(res.body.message).toContain(`Login Success!`);

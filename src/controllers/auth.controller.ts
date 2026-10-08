@@ -78,18 +78,18 @@ export const login = async (
       { expiresIn: "7d" },
     );
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-    const exipryTimeInSevenDays = 1 * 60 * 1000 * 60 * 24 * 7;
+    const expiryTimeInSevenDays = 1 * 60 * 1000 * 60 * 24 * 7;
     await query<User>(
       `insert into refresh_token(user_id,token_hash,expires_at) values($1,$2,$3)`,
       [
         findUser.rows[0].id,
         hashedRefreshToken,
-        new Date(Date.now() + exipryTimeInSevenDays).toISOString(),
+        new Date(Date.now() + expiryTimeInSevenDays).toISOString(),
       ],
     );
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      maxAge: 1 * 60 * 1000 * 60 * 24 * 7,
+      maxAge: expiryTimeInSevenDays,
       sameSite: "none",
       secure: true,
     });
