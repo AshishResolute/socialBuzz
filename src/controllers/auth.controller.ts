@@ -119,6 +119,9 @@ export const refresh = async (
       refreshToken,
       JWT_REFRESH_KEY!,
     ) as UserJWTPayload;
+
+    // haven't handeled invalid tokens yet
+
     const checkTokenExists = await db.query(
       `select * from refresh_token where user_id=$1 order by id desc`,
       [validToken.id],

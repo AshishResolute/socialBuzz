@@ -44,7 +44,7 @@ router.put(
 );
 
 router.delete(
-  "/:postId",
+  "/deletePost/:postId",
   verifyToken,
   validate({ params: checkUserPostId }),
   deleteUserPost as unknown as RequestHandler,
@@ -150,6 +150,52 @@ router.get(
  *                 updated_at:
  *                   type: string
  *                   example: 2026-08-02T10:55:00.000Z
+ */
+
+/**
+ * @openapi
+ * /post/deletePost/{postId}:
+ *   delete:
+ *     tags: [Post]
+ *     summary: Delete Your post
+ *     description: users can delete their own post
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: postId
+ *         in: path
+ *         required: true
+ *         description: This should be the id of the post u want to delete
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Successfully deletes the post of the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: post deleted successfully!
+ *                 timeStamp:
+ *                   type: string
+ *                   example: 10/16/2026, 12:07:00 PM
+ *       404:
+ *         description: Post not found or does not belong to the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Post not found
  */
 
 export default router;

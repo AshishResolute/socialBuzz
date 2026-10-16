@@ -127,7 +127,7 @@ export const deleteUserPost = async (
       user_id,
     ]);
     res.status(200).json({
-      success: false,
+      success: true,
       message: `post deleted successfully!`,
       timeStamp: new Date().toLocaleString(),
     });
