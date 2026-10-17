@@ -19,6 +19,7 @@ describe(`Should test signup`, () => {
       anotherTestMail,
     ]);
   });
+
   test(`should successfully create user account`, async () => {
     const input = {
       email: testMail,
@@ -50,7 +51,7 @@ describe(`Should test signup`, () => {
   });
   test(`should return 400 for an invalid username`, async () => {
     const res = await request(app).post("/auth/signup").send({
-      email: testMail,
+      email: anotherTestMail,
       password: "Test@user",
       confirmPassword: `Test@user`,
       userName: 999,
@@ -109,7 +110,7 @@ describe(`Should test signup`, () => {
     });
 
     const res = await request(app).post("/auth/signup").send({
-      email: testMail,
+      email: anotherTestMail,
       password: "Test@user",
       confirmPassword: `Test@user`,
       userName: `testUser`,
@@ -190,15 +191,15 @@ describe(`Testing login route`, () => {
     );
   });
 
-  test(`Should return 400 for invalid Passwords`,async()=>{
-    const res = await request(app)
-    .post(`/auth/login`)
-    .send({
-      email:testMail,
-      password:`Invalid@password`
-    })
+  test(`Should return 400 for invalid Passwords`, async () => {
+    const res = await request(app).post(`/auth/login`).send({
+      email: testMail,
+      password: `Invalid@password`,
+    });
 
-    expect(res.status).toBe(400)
-    expect(res.body.message).toContain(`The email or password provided is incorrect`)
-  })
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain(
+      `The email or password provided is incorrect`,
+    );
+  });
 });

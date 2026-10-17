@@ -32,7 +32,7 @@ router.post(
   userPostLimitter,
   verifyToken,
   validate({ body: checkUserContent }),
-  createUserPost as unknown as RequestHandler,
+  createUserPost,
 );
 
 router.put(
