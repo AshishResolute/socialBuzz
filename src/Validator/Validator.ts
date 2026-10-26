@@ -79,7 +79,7 @@ export const validateUserNameSchema = joi.object<userNameInterface>({
 });
 
 export const checkUserContent = joi.object<checkUserContentInterface>({
-  content: joi.string().trim().min(30).max(800).required().messages({
+  content: joi.string().trim().min(30).max(799).required().messages({
     "string.base": "content must be a string",
     "string.empty": `Post content cannot be empty`,
     "string.max": `Post maximum characters reached(800) characters allowed`,
