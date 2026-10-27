@@ -93,6 +93,7 @@ export const checkUserPostId = joi.object<checkUserPostIdInterface>({
     "any.required": `PostId is required`,
     "number.base": `PostId must be a valid number`,
     "number.integer": `PostId must be an integer`,
+    "number.positive":`postId must be a positive number`
   }),
 });
 

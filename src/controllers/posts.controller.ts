@@ -19,7 +19,6 @@ import type { QueryResult } from "pg";
 import { query } from "../database/query.js";
 import { catchAsync } from "../util/catchAsync.js";
 
-
 export const createUserPost = catchAsync(
   async (
     req: Request<{}, {}, checkUserContentInterface, {}>,
@@ -63,12 +62,7 @@ export const updateUserPostContent = async (
   try {
     let user_id = req.user.id;
     let post_id = req.params.postId;
-    // let findUser = await db.query(
-    //   `select u.username as username,p.id as post_id from users as u join posts as p on u.id = p.user_id where p.user_id=$1 and p.id=$2`,
-    //   [user_id, post_id],
-    // );
-    // if (findUser.rowCount === 0)
-    //   return next(new ClientError(`User not Found!`, 404, `No post found!`));
+    if(!post_id) {next(new ClientError(`postId  not provided`,400,`postId not provided`))}
     let { content } = req.body;
     let updatePostContent = await db.query(
       `update posts set content=$1,updated_at=$2 where id=$3 and user_id=$4 returning updated_at`,
@@ -357,5 +351,3 @@ export const findPostBySearch = async (
     next(error);
   }
 };
-
-

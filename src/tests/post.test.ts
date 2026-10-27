@@ -82,3 +82,58 @@ describe(`Testing post creation route`, () => {
     expect(res.body.success).toBeFalsy();
   });
 });
+
+describe(`Testing update post content route`, () => {
+  let token = "";
+
+  beforeEach(async () => {
+    await request(app).post("/auth/signup").send({
+      email: testMail,
+      password: `Test@User`,
+      confirmPassword: `Test@User`,
+      userName: `PostUser`,
+    });
+
+    const login = await request(app).post("/auth/login").send({
+      email: testMail,
+      password: `Test@User`,
+    });
+
+    token = login.body.token;
+  });
+
+  afterEach(async () => {
+    await pool.query(`delete from users where email=$1`, [testMail]);
+  });
+
+  test(`Should return 400 for invalid postId provided in params`, async () => {
+    const res = await request(app)
+      .put("/post/editPost/:invalidPostId")
+      .send({
+        content: `This is a post that i want people to see as the updated one not the old one`,
+      })
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.message).toBe("PostId must be a valid number");
+    expect(res.body).toHaveProperty("success");
+    expect(res.body.success).toBeFalsy();
+  });
+
+  test(`Should return 400 when postId is not a positive number`, async () => {
+    const res = await request(app)
+      .put("/post/editPost/0")
+      .send({
+        content: `This is a post that i want people to see as the updated one not the old one`,
+      })
+      .set("Authorization", `Bearer ${token}`);
+console.log(res.body)
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.message).toBe("postId must be a positive number");
+    expect(res.body).toHaveProperty("success");
+    expect(res.body.success).toBeFalsy();
+    
+  });
+});
