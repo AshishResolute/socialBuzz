@@ -40,7 +40,7 @@ router.put(
   userPostLimitter,
   verifyToken,
   validate({ params: checkUserPostId, body: checkUserContent }),
-  updateUserPostContent as unknown as RequestHandler,
+  updateUserPostContent,
 );
 
 router.delete(

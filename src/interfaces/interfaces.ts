@@ -42,7 +42,7 @@ export interface AuthenticatedRequest<
 }
 
 export interface checkUserPostIdInterface {
-  postId?: string;
+  postId?: number;
 }
 
 export interface validateUserCommentInterface {

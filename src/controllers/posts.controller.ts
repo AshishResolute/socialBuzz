@@ -50,19 +50,16 @@ export const createUserPost = catchAsync(
 );
 
 export const updateUserPostContent = async (
-  req: AuthenticatedRequest<
-    checkUserPostIdInterface,
-    {},
-    checkUserContentInterface,
-    {}
-  >,
+  req: Request<checkUserPostIdInterface, {}, checkUserContentInterface, {}>,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    let user_id = req.user.id;
+    let user_id = req.user?.id;
     let post_id = req.params.postId;
-    if(!post_id) {next(new ClientError(`postId  not provided`,400,`postId not provided`))}
+    if (!post_id) {
+      next(new ClientError(`postId  not provided`, 400, `postId not provided`));
+    }
     let { content } = req.body;
     let updatePostContent = await db.query(
       `update posts set content=$1,updated_at=$2 where id=$3 and user_id=$4 returning updated_at`,
@@ -73,7 +70,8 @@ export const updateUserPostContent = async (
       message: `Post successfully updated!`,
     });
     res.status(200).json({
-      message: `post updated successfuly `,
+      success: true,
+      message: `post updated successfully`,
       updated_at: updatePostContent.rows[0].updated_at,
     });
   } catch (error) {

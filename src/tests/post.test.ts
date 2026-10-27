@@ -9,6 +9,7 @@ test(`Testing health route`, async () => {
 });
 
 const testMail = `test@post.com`;
+
 describe(`Testing post creation route`, () => {
   let token = "";
   beforeEach(async () => {
@@ -85,7 +86,7 @@ describe(`Testing post creation route`, () => {
 
 describe(`Testing update post content route`, () => {
   let token = "";
-
+  let postId: string;
   beforeEach(async () => {
     await request(app).post("/auth/signup").send({
       email: testMail,
@@ -100,6 +101,15 @@ describe(`Testing update post content route`, () => {
     });
 
     token = login.body.token;
+
+    const post = await request(app)
+      .post("/post/content")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        content: `This is an valid post that can be easily read by my followers`,
+      });
+
+    postId = post.body.postId;
   });
 
   afterEach(async () => {
@@ -128,12 +138,71 @@ describe(`Testing update post content route`, () => {
         content: `This is a post that i want people to see as the updated one not the old one`,
       })
       .set("Authorization", `Bearer ${token}`);
-console.log(res.body)
+
     expect(res.status).toBe(400);
     expect(res.body).toHaveProperty("message");
     expect(res.body.message).toBe("postId must be a positive number");
     expect(res.body).toHaveProperty("success");
     expect(res.body.success).toBeFalsy();
+  });
+
+  test(`should return 400 status if provided contente is not a string`, async () => {
+    const res = await request(app)
+      .put(`/post/editPost/:${postId}`)
+      .send({
+        content: null,
+      })
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.message).toBe("content must be a string");
+    expect(res.body).toHaveProperty("success");
+    expect(res.body.success).toBeFalsy();
+  });
+
+  test(`should return 400 status if content length is less than 30 chars`, async () => {
+    const res = await request(app)
+      .put(`/post/editPost/:${postId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ content: `post has less than 30 chars` });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.message).toBe("Content must have atleast 30 characters");
+    expect(res.body).toHaveProperty("success");
+    expect(res.body.success).toBeFalsy();
+  });
+
+  test(`should return 400 status if content length is more than 800 chars`, async () => {
+    const content: string = new Array(800).fill("A").join("");
+    const res = await request(app)
+      .put(`/post/editPost/:${postId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ content });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.message).toBe(
+      "Post maximum characters reached(800) characters allowed",
+    );
+    expect(res.body).toHaveProperty("success");
+    expect(res.body.success).toBeFalsy();
+  });
+
+  test(`should return 200 status when post is successfully updated`, async () => {
+    const res = await request(app)
+      .put(`/post/editPost/${postId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        content: `This is a post that i want people to see as the updated one not the old one`,
+      });
+
     
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.message).toBe(`post updated successfully`);
+    expect(res.body).toHaveProperty("success");
+    expect(res.body.success).toBeTruthy();
   });
 });
