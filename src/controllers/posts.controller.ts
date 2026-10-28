@@ -93,12 +93,12 @@ export const updateUserPostContent = async (
   }
 };
 
-export const deleteUserPost = async (
-  req: Request<checkUserPostIdInterface, {}, {}, {}>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const deleteUserPost = catchAsync(
+  async (
+    req: Request<checkUserPostIdInterface>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     const user_id = req.user?.id;
     const post_id = req.params.postId;
 
@@ -106,33 +106,23 @@ export const deleteUserPost = async (
       `delete from posts where id=$1 and user_id=$2`,
       [post_id, user_id],
     );
-    if (deletePost.rowCount === 0)
-      return next(
+    if (deletePost.rowCount === 0) {
+      next(
         new ClientError(
           `Post not found`,
           404,
-          `If user account deleted this post have`,
+          `Post doesn't exist or you don't own it`,
         ),
       );
+      return;
+    }
     res.status(200).json({
       success: true,
       message: `post deleted successfully!`,
-      timeStamp: new Date().toLocaleString(),
+      timeStamp: new Date().toISOString(),
     });
-  } catch (error) {
-    if (CheckIfDatabaseError(error)) {
-      console.error(`Database Error:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    }
-    if (error instanceof Error) {
-      console.log(`Error Details:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    }
-    next(error);
-  }
-};
+  },
+);
 
 export const savePost = async (
   req: Request<UserPostAndCommentIdInterface>,
