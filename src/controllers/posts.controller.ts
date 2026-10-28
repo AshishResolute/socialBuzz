@@ -7,7 +7,6 @@ import {
   ClientError,
 } from "../ErrorHandler/ErrorClass.js";
 import type {
-  AuthenticatedRequest,
   checkUserContentInterface,
   checkUserPostIdInterface,
   Posts,
@@ -95,18 +94,19 @@ export const updateUserPostContent = async (
 };
 
 export const deleteUserPost = async (
-  req: AuthenticatedRequest<checkUserPostIdInterface, {}, {}, {}>,
+  req: Request<checkUserPostIdInterface, {}, {}, {}>,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    let user_id = req.user.id;
-    let post_id = req.params.postId;
-    let findPost = await db.query(
-      `select id from posts where id=$1 and user_id=$2`,
+    const user_id = req.user?.id;
+    const post_id = req.params.postId;
+
+    const deletePost = await db.query(
+      `delete from posts where id=$1 and user_id=$2`,
       [post_id, user_id],
     );
-    if (findPost.rowCount === 0)
+    if (deletePost.rowCount === 0)
       return next(
         new ClientError(
           `Post not found`,
@@ -114,10 +114,6 @@ export const deleteUserPost = async (
           `If user account deleted this post have`,
         ),
       );
-    await db.query(`delete from posts where id=$1 and user_id=$2`, [
-      post_id,
-      user_id,
-    ]);
     res.status(200).json({
       success: true,
       message: `post deleted successfully!`,
@@ -131,7 +127,7 @@ export const deleteUserPost = async (
     }
     if (error instanceof Error) {
       console.log(`Error Details:${error.message}`);
-      next(new AppError(`error.message`, 500));
+      next(new AppError(error.message, 500));
       return;
     }
     next(error);
