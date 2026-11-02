@@ -44,7 +44,7 @@ router.put(
 );
 
 router.delete(
-  "/deletePost/:postId",
+  "/:postId",
   verifyToken,
   validate({ params: checkUserPostId }),
   deleteUserPost as unknown as RequestHandler,

@@ -198,11 +198,74 @@ describe(`Testing update post content route`, () => {
         content: `This is a post that i want people to see as the updated one not the old one`,
       });
 
-    
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("message");
     expect(res.body.message).toBe(`post updated successfully`);
     expect(res.body).toHaveProperty("success");
     expect(res.body.success).toBeTruthy();
   });
+});
+
+describe(`Testing if user can delete their post`, () => {
+  let token = "";
+  let postId: string = "";
+  beforeEach(async () => {
+    await request(app).post("/auth/signup").send({
+      email: testMail,
+      password: "Test@user",
+      confirmPassword: `Test@user`,
+      userName: `postUser`,
+    });
+
+    const login = await request(app).post("/auth/login").send({
+      email: testMail,
+      password: `Test@user`,
+    });
+
+    token = login.body.token;
+
+    const post = await request(app)
+      .post("/post/content")
+      .set("Authorization", `Bearer ${token}`)
+      .send({
+        content: `This is an valid post that can be easily read by my followers`,
+      });
+
+    postId = post.body.postId;
+  });
+
+  afterEach(async () => {
+    await pool.query(`delete from users where email=$1`, [testMail]);
+  });
+
+  test(`Must return 400 if invalidPost is provided`, async () => {
+    const res = await request(app)
+      .delete(`/post/InvalidId`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(400);
+  });
+
+  test(`Should return 404 if post is not available to delete`, async () => {
+    const res = await request(app)
+      .delete(`/post/${postId + 1}`)
+      .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(404)
+      expect(res.body.success).toBeFalsy()
+      expect(res.body.message).toBe(`Post not found`)
+      expect(res.body.details).toBe(`Post doesn't exist or you don't own it`)
+      
+  });
+  test(`Should return 200 if user is able to delete post`, async () => {
+    const res = await request(app)
+      .delete(`/post/${postId}`)
+      .set("Authorization", `Bearer ${token}`);
+
+      expect(res.status).toBe(200)
+      expect(res.body.success).toBeTruthy()
+      expect(res.body.message).toBe(`post deleted successfully!`)
+      
+  });
+
 });
