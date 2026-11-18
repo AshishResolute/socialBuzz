@@ -58,12 +58,18 @@ export const updateUserPostContent = async (
     let post_id = req.params.postId;
     if (!post_id) {
       next(new ClientError(`postId  not provided`, 400, `postId not provided`));
+      return;
     }
     let { content } = req.body;
     let updatePostContent = await db.query(
       `update posts set content=$1,updated_at=$2 where id=$3 and user_id=$4 returning updated_at`,
       [content, new Date().toISOString(), post_id, user_id],
     );
+    const result = updatePostContent.rows[0];
+    if(!result){
+      next(new ClientError(`Post not found`,404,`Post updation failed!`))
+      return
+    }
     await postQueue.add("postQueue", {
       to: process.env.RESEND_USER_ACCOUNT_NAME,
       message: `Post successfully updated!`,
@@ -71,15 +77,14 @@ export const updateUserPostContent = async (
     res.status(200).json({
       success: true,
       message: `post updated successfully`,
-      updated_at: updatePostContent.rows[0].updated_at,
+      updated_at: result.updated_at,
     });
   } catch (error) {
     if (CheckIfDatabaseError(error)) {
       console.error(`DataBase error:${error.message}`);
       res.status(500).json({
         success: false,
-        message: error.message,
-        details: error.detail || error.cause,
+        message: `Database Error`,
         timeStamp: new Date().toISOString(),
       });
       return;
@@ -303,6 +308,7 @@ export const findPostBySearch = async (
           `Enter a keyword to search`,
         ),
       );
+      return
     }
     const matchedPosts = await query<Posts>(
       `select id,content from posts where content_tsv @@ plainto_tsquery('english',$1)`,
