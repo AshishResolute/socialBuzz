@@ -4,6 +4,7 @@ import {
   ClientError,
   DataBaseErrors,
 } from "../ErrorHandler/ErrorClass.js";
+import { DatabaseError } from "pg";
 
 interface ErrorMessage {
   success: boolean;
@@ -45,6 +46,14 @@ export const GlobalErrorHandler = (
     };
     res.status(err.statusCode).json(ErrorDetails);
     return;
+  }
+  else if(err instanceof DatabaseError){
+    if(err.code==='23503')
+    res.status(404).json({
+      success:false,
+      message:`Post not found`
+    })
+    return 
   }
   res.status(500).json({
     success: false,

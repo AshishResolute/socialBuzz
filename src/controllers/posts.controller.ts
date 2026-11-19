@@ -48,12 +48,12 @@ export const createUserPost = catchAsync(
   },
 );
 
-export const updateUserPostContent = async (
-  req: Request<checkUserPostIdInterface, {}, checkUserContentInterface, {}>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const updateUserPostContent = catchAsync(
+  async (
+    req: Request<checkUserPostIdInterface, {}, checkUserContentInterface, {}>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     let user_id = req.user?.id;
     let post_id = req.params.postId;
     if (!post_id) {
@@ -66,9 +66,9 @@ export const updateUserPostContent = async (
       [content, new Date().toISOString(), post_id, user_id],
     );
     const result = updatePostContent.rows[0];
-    if(!result){
-      next(new ClientError(`Post not found`,404,`Post updation failed!`))
-      return
+    if (!result) {
+      next(new ClientError(`Post not found`, 404, `Post updation failed!`));
+      return;
     }
     await postQueue.add("postQueue", {
       to: process.env.RESEND_USER_ACCOUNT_NAME,
@@ -79,24 +79,8 @@ export const updateUserPostContent = async (
       message: `post updated successfully`,
       updated_at: result.updated_at,
     });
-  } catch (error) {
-    if (CheckIfDatabaseError(error)) {
-      console.error(`DataBase error:${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: `Database Error`,
-        timeStamp: new Date().toISOString(),
-      });
-      return;
-    }
-    if (error instanceof Error) {
-      console.error(`Standard App Error:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    }
-    next(error);
-  }
-};
+  },
+);
 
 export const deleteUserPost = catchAsync(
   async (
@@ -129,12 +113,12 @@ export const deleteUserPost = catchAsync(
   },
 );
 
-export const savePost = async (
-  req: Request<UserPostAndCommentIdInterface>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const savePost = catchAsync(
+  async (
+    req: Request<UserPostAndCommentIdInterface>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     const userId = req.user?.id;
     if (!userId) {
       next(
@@ -163,34 +147,16 @@ export const savePost = async (
       `insert into saved_posts(user_id,post_id) values($1,$2)`,
       [userId, postId],
     );
-    if (bookmarkPost.rowCount)
+    if (bookmarkPost.rowCount) {
       res.status(200).json({
         success: true,
         message: `Post bookMarked`,
         postId,
         saved_at: new Date().toISOString(),
       });
-    return;
-  } catch (error) {
-    if (CheckIfDatabaseError(error)) {
-      console.error(`Database Error:${error.message}`);
-      if (error.code === "23505") {
-        res.status(200).json({
-          success: true,
-          message: `Post already saved!`,
-        });
-        return;
-      }
-      next(new AppError(error.message, 500));
-      return;
-    } else if (error instanceof Error) {
-      console.error(`Standard App Error:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
     }
-    next(error);
-  }
-};
+  },
+);
 
 export const getSavedPost = async (
   req: Request,
@@ -308,7 +274,7 @@ export const findPostBySearch = async (
           `Enter a keyword to search`,
         ),
       );
-      return
+      return;
     }
     const matchedPosts = await query<Posts>(
       `select id,content from posts where content_tsv @@ plainto_tsquery('english',$1)`,
