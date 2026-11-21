@@ -158,12 +158,11 @@ export const savePost = catchAsync(
   },
 );
 
-export const getSavedPost = async (
+export const getSavedPost = catchAsync(async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  try {
     const userId = req.user?.id;
     if (!userId) {
       next(
@@ -176,7 +175,7 @@ export const getSavedPost = async (
       return;
     }
     const userSavedPosts = await db.query(
-      `select p.content,p.created_at from posts as p join saved_posts as s on s.post_id=p.id where s.user_id=$1`,
+      `select p.content,p.created_at,u.username from posts as p join saved_posts as s on s.post_id=p.id join users as u on u.id=p.user_id  where s.user_id=$1`,
       [userId],
     );
     if (!userSavedPosts.rowCount) {
@@ -194,19 +193,7 @@ export const getSavedPost = async (
       bookmarkedPosts,
       viewed_at: new Date().toISOString(),
     });
-  } catch (error) {
-    if (CheckIfDatabaseError(error)) {
-      console.error(`Database Error:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    } else if (error instanceof Error) {
-      console.error(`Standard AppError:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    }
-    next(error);
-  }
-};
+});
 
 export const removeBookMark = async (
   req: Request<UserPostAndCommentIdInterface>,

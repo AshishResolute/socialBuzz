@@ -40,20 +40,20 @@ export const GlobalErrorHandler = (
     const ErrorDetails: ErrorMessage & { code: string; detail?: string } = {
       success: false,
       message: err.message,
-      code: err.code??'500',
+      code: err.code ?? "500",
       statusCode: err.statusCode,
       detail: err.detail ?? err.message,
     };
     res.status(err.statusCode).json(ErrorDetails);
     return;
-  }
-  else if(err instanceof DatabaseError){
-    if(err.code==='23503')
-    res.status(404).json({
-      success:false,
-      message:`Post not found`
-    })
-    return 
+  } else if (err instanceof DatabaseError) {
+    if (err.code === "23503") {
+      res.status(404).json({
+        success: false,
+        message: `Post not found`,
+      });
+      return;
+    }
   }
   res.status(500).json({
     success: false,
