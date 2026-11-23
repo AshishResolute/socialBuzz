@@ -1,11 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { postQueue } from "../queues/emailQueue.js";
 import db from "../database/connection.js";
-import {
-  AppError,
-  CheckIfDatabaseError,
-  ClientError,
-} from "../ErrorHandler/ErrorClass.js";
+import { AppError, ClientError } from "../ErrorHandler/ErrorClass.js";
 import type {
   checkUserContentInterface,
   checkUserPostIdInterface,
@@ -158,11 +154,8 @@ export const savePost = catchAsync(
   },
 );
 
-export const getSavedPost = catchAsync(async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
+export const getSavedPost = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.id;
     if (!userId) {
       next(
@@ -193,14 +186,15 @@ export const getSavedPost = catchAsync(async (
       bookmarkedPosts,
       viewed_at: new Date().toISOString(),
     });
-});
+  },
+);
 
-export const removeBookMark = async (
-  req: Request<UserPostAndCommentIdInterface>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const removeBookMark = catchAsync(
+  async (
+    req: Request<UserPostAndCommentIdInterface>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     const userId = req.user?.id;
     if (!userId) {
       next(
@@ -232,26 +226,15 @@ export const removeBookMark = async (
       message: `BookMarked removed for post:${postId}`,
       removed_at: new Date().toISOString(),
     });
-  } catch (error) {
-    if (CheckIfDatabaseError(error)) {
-      console.error(`Database Error:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    } else if (error instanceof Error) {
-      console.error(`Standard AppError:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    }
-    next(error);
-  }
-};
+  },
+);
 
-export const findPostBySearch = async (
-  req: Request<{}, {}, {}, UserSearchQuery>,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
+export const findPostBySearch = catchAsync(
+  async (
+    req: Request<{}, {}, {}, UserSearchQuery>,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     const search = req.validatedQuery?.userQuery;
     if (!search) {
       next(
@@ -281,16 +264,5 @@ export const findPostBySearch = async (
       matchedPosts: matchedPosts.rows,
       timeStamp: new Date().toISOString(),
     });
-  } catch (error) {
-    if (CheckIfDatabaseError(error)) {
-      console.error(`Database Error:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    } else if (error instanceof Error) {
-      console.error(`Standard App Error:${error.message}`);
-      next(new AppError(error.message, 500));
-      return;
-    }
-    next(error);
-  }
-};
+  },
+);

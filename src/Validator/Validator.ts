@@ -233,7 +233,7 @@ export const validateUserSearchQuery = joi.object<UserSearchQuery>({
     .string()
     .trim()
     .replace(/\s+/g, " ")
-    .min(3)
+    .min(4)
     .max(100)
     .required()
     .messages({
